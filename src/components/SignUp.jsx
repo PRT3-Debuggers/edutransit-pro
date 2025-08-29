@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import '../assets/styles/App.css';
 import MessageModal from "../modals/MessageModal.jsx";
-import {signUpUser} from "../firebase/firebase.js";
+import {signUpUser,saveDoc} from "../firebase/firebase.js";
 
 export default function SignUp() {
     const [emailAddress, setEmailAddress] = useState("");
@@ -10,7 +10,7 @@ export default function SignUp() {
     const [lastName, setLastName] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [role, setRole] = useState(""); // Parent or Driver
+    const [role, setRole] = useState("Parent"); // Parent or Driver
     const [modalOpen, setModalOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -36,19 +36,15 @@ export default function SignUp() {
             emailAddress: emailAddress,
             firstName: firstName,
             lastName: lastName,
-            password: password,
             role: role
         };
 
-        const signUpData = {
-            email: emailAddress,
-            password: password
-
-        }
-
         try {
-            const result = await signUpUser(signUpData);
+            const result = await signUpUser(emailAddress,password);
+            const newResult = await saveDoc(userData,"user-data");
+
             console.log('Signup successful:', result);
+            console.log('User data saved to FB:', newResult);
 
             // Clear form fields
             setEmailAddress("");
@@ -139,7 +135,7 @@ export default function SignUp() {
                         <input
                             type="radio"
                             name="role"
-                            value="I am parent"
+                            value="Parent"
                             checked={role === "Parent"}
                             onChange={(e) => setRole(e.target.value)}
                             required
@@ -150,7 +146,7 @@ export default function SignUp() {
                         <input
                             type="radio"
                             name="role"
-                            value="I am a driver"
+                            value="Driver"
                             checked={role === "Driver"}
                             onChange={(e) => setRole(e.target.value)}
                         />

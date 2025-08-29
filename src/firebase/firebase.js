@@ -3,7 +3,6 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import {getFirestore, collection, addDoc,doc,  query, where, getDocs,getDoc,setDoc,updateDoc,deleteDoc,Timestamp} from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword,signInWithEmailAndPassword ,signOut,sendPasswordResetEmail} from "firebase/auth";
-import {deleteAnyUserFromIDB, getAllStories, getSingleUserFromIDB, saveUserToIDB} from "../lib/db.js";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -51,7 +50,6 @@ export async function signUpUser(email, password) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        await saveUserPlanToFirestore(user.uid,email);
         return user;
     } catch (error) {
         //console.error("Error signing up:", error.code, error.message);
@@ -60,71 +58,10 @@ export async function signUpUser(email, password) {
     }
 }
 
-export async function getDataAfterUpgrade() {
-    try {
-        const user = await getSingleUserFromIDB();
-        const userPlanInfo = await getUserPlan(user.uid);
-
-        if (userPlanInfo.plan === 'pro') {
-            const proExpiresAt = userPlanInfo.pro_expires_at?.toDate(); // Convert Firestore timestamp if it exists
-            const now = new Date();
-
-            if (proExpiresAt && now > proExpiresAt) {
-                alert('Your Pro subscription has expired, and your stories will not saved online. PLease renew your subscription to continue enjoying Pro features.');
-                // Handle expired plan case here, e.g., update user plan or notify them to renew.
-                await updateDocument('users', user.uid, {plan: 'free'}); // Revert user to free if necessary
-                userPlanInfo.plan = 'free'; // Update locally
-            }
-        }
-
-        await saveUserToIDB({
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            plan: userPlanInfo.plan,
-            username: userPlanInfo.username,
-            upgradedAt: userPlanInfo.upgradedAt,
-            pro_expires_at: userPlanInfo.pro_expires_at,
-        });
-    }
-    catch(error){
-        console.error("Error getting data after upgrade:", error);
-        alert("Failed to retrieve user data after upgrade: " + error.message);
-    }
-
-}
-
 export async function loginUser(email, password) {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-
-        const userPlanInfo = await getUserPlan(user.uid);
-
-
-        if (userPlanInfo.plan === 'pro') {
-            const proExpiresAt = userPlanInfo.pro_expires_at?.toDate(); // Convert Firestore timestamp if it exists
-            const now = new Date();
-
-            if (proExpiresAt && now > proExpiresAt) {
-                alert('Your Pro subscription has expired, and your stories will not saved online. PLease renew your subscription to continue enjoying Pro features.');
-                // Handle expired plan case here, e.g., update user plan or notify them to renew.
-                await updateDocument('users', user.uid, {plan: 'free'}); // Revert user to free if necessary
-                userPlanInfo.plan = 'free'; // Update locally
-            }
-        }
-        
-        await saveUserToIDB({
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            plan: userPlanInfo.plan,
-            username: userPlanInfo.username,
-            upgradedAt: userPlanInfo.upgradedAt,
-            pro_expires_at: userPlanInfo.pro_expires_at,
-        });
     } catch (error) {
         console.error("Error logging in:", error.code, error.message);
         alert("Login failed: " + error.message);
@@ -168,7 +105,6 @@ export const logoutUser = async () => {
     const auth = getAuth();
     try {
         await signOut(auth);
-        await deleteAnyUserFromIDB();
         console.log("User signed out successfully.");
     } catch (error) {
         console.error("Error signing out:", error);
