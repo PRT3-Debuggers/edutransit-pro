@@ -1,6 +1,6 @@
 
 import React from 'react';
-import SchoolBus from '../assets/Schoolbus.png';
+import SchoolBus from '/SchoolBus.png';
 import '../assets/styles/Main.css';
 
 export default function MainSection() {
