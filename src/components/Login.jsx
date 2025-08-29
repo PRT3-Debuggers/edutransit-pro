@@ -2,18 +2,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import '../assets/styles/App.css';
 import MessageModal from "../modals/MessageModal.jsx";
-import loginUser from "../scripts/login.js";
+import {getDocumentsByField, loginUser} from "../firebase/firebase.js";
 
 export default function Login() {
     const [userEmail, setUserEmail] = useState("");
     const [userPassword, setUserPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const navigate = useNavigate();
 
     const handleEmailChange = (e) => setUserEmail(e.target.value);
     const handlePasswordChange = (e) => setUserPassword(e.target.value);
-    const handleConfirmPasswordChange = (e) => setConfirmPassword(e.target.value);
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
@@ -21,17 +19,16 @@ export default function Login() {
             alert("Password must be at least 6 characters.");
             return;
         }
-        if (userPassword !== confirmPassword) {
-            alert("Passwords do not match.");
-            return;
-        }
+
         const userData = await loginUser(userEmail, userPassword);
-        console.log('Login successful:', userData);
 
-        sessionStorage.setItem("userData", userData); //store user data in session storage
+        const realUserData = await getDocumentsByField("user-data","emailAddress",userData.email)
+        console.log('Login successful:', userData.email);
 
-        setModalOpen(true);
+        sessionStorage.setItem("userData", JSON.stringify(realUserData));
 
+         setModalOpen(true);
+        navigate('/finddriver');
     };
 
     return (
@@ -62,16 +59,6 @@ export default function Login() {
                         onChange={handlePasswordChange}
                         value={userPassword}
                         placeholder="Password"
-                        required
-                        className="inputText"
-                    />
-                </p>
-                <p>
-                    <input
-                        type="password"
-                        onChange={handleConfirmPasswordChange}
-                        value={confirmPassword}
-                        placeholder="Confirm Password"
                         required
                         className="inputText"
                     />
