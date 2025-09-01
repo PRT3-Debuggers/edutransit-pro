@@ -28,7 +28,7 @@ export default function Login() {
         sessionStorage.setItem("userData", JSON.stringify(realUserData));
 
          setModalOpen(true);
-        navigate('/finddriver');
+        navigate('/profile');
     };
 
     return (
