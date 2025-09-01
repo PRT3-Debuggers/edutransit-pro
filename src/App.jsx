@@ -11,6 +11,7 @@ import Navigation from "./components/Navigation.jsx";
 import MapWithPoints from "./components/MapWithPoints.jsx";
 import CompleteProfile from "./components/CompleteProfile.jsx";
 import Profile from "./components/Profile.jsx";
+import DriverReview from "./components/DriverReview.jsx";
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/signup" element={<SignUp/>}/>
                 <Route path="/login" element={<Login />} />
                 <Route path="/finddriver" element={<MapWithPoints/>}/>
+                <Route path="/DriverReview" element={<DriverReview />} />
             </Routes>
         </BrowserRouter>
     );
