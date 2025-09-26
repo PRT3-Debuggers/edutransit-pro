@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import '../assets/styles/Navigation.css';
 import { FaSchool, FaBars, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import FileTicket from './FileTicket';
 
 const Navigation = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,7 +34,7 @@ const Navigation = () => {
                 <Link to="/signup" className="nav-link">Signup</Link>
                 <Link to="/finddriver" className="nav-link">Find a Driver</Link>
                 <Link to="/" className="nav-link">For Parents</Link>
-                <Link to="/" className="nav-link">For Drivers</Link>
+                <Link to="/tickets" className="nav-link">Ticketing</Link>
                 <Link to="/" className="nav-link">Schools</Link>
                 <Link to="/about" className="nav-link">About</Link>
                 <Link to="/privacy" className="nav-link">Privacy</Link>
