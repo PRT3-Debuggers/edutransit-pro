@@ -1,132 +1,136 @@
-import { useState, useEffect } from "react";
-import MessageModal from "../modals/MessageModal.jsx";
-import { saveDriverReview, getDriverReviews } from "../firebase/firebase.js";
-import "../assets/styles/App.css";
+import React, { useState, useEffect } from "react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import "../assets/styles/DriverReview.css";
 
-export default function DriverReviewPage({ driverId }) {
-    const [rating, setRating] = useState(0);
-    const [comment, setComment] = useState("");
+const drivers = [
+    { id: 1, name: "John Doe", vehicle: "Renault Clio", languages: ["English", "Afrikaans"], status: "Available", profilePic: "https://randomuser.me/api/portraits/men/1.jpg" },
+    { id: 2, name: "Lebo Mokoena", vehicle: "Toyota Quantum", languages: ["Zulu", "English"], status: "Unavailable", profilePic: "https://randomuser.me/api/portraits/men/2.jpg" },
+    { id: 3, name: "Fatima Jacobs", vehicle: "Nissan Almera", languages: ["English"], status: "Available", profilePic: "https://randomuser.me/api/portraits/women/3.jpg" },
+    { id: 4, name: "Ahmed Khan", vehicle: "Hyundai H1", languages: ["English", "Arabic"], status: "Available", profilePic: "https://randomuser.me/api/portraits/men/4.jpg" },
+    { id: 5, name: "Sipho Dlamini", vehicle: "Ford Transit", languages: ["Xhosa", "English"], status: "Unavailable", profilePic: "https://randomuser.me/api/portraits/men/5.jpg" },
+    { id: 6, name: "Nicole Smith", vehicle: "VW Polo", languages: ["English"], status: "Available", profilePic: "https://randomuser.me/api/portraits/women/6.jpg" },
+    { id: 7, name: "Tshepo Moloi", vehicle: "Mazda 2", languages: ["Sotho", "English"], status: "Available", profilePic: "https://randomuser.me/api/portraits/men/7.jpg" },
+    { id: 8, name: "Zainab Parker", vehicle: "Chevrolet Aveo", languages: ["English", "Afrikaans"], status: "Unavailable", profilePic: "https://randomuser.me/api/portraits/women/8.jpg" },
+    { id: 9, name: "Mohammed Patel", vehicle: "Toyota Corolla", languages: ["English", "Urdu"], status: "Available", profilePic: "https://randomuser.me/api/portraits/men/9.jpg" },
+    { id: 10, name: "Thandiwe Ndlovu", vehicle: "Kia Picanto", languages: ["Zulu", "English"], status: "Available", profilePic: "https://randomuser.me/api/portraits/women/10.jpg" },
+];
+
+export default function DriverReview() {
+    const { id } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const [driver, setDriver] = useState(location.state?.driver || null);
     const [reviews, setReviews] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [modalMessage, setModalMessage] = useState("");
+    const [successMsg, setSuccessMsg] = useState("");
 
-    // Fetch reviews for this driver
+    // Load driver info
     useEffect(() => {
-        const fetchReviews = async () => {
-            try {
-                const data = await getDriverReviews(driverId);
-                setReviews(data);
-            } catch (error) {
-                console.error("Error fetching reviews:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchReviews();
-    }, [driverId]);
+        if (!driver && id) {
+            const foundDriver = drivers.find((d) => d.id === Number(id));
+            if (foundDriver) setDriver(foundDriver);
+        }
+    }, [id, driver]);
 
-    // Submit a new review
-    const handleSubmit = async (e) => {
+    // Load reviews from localStorage
+    useEffect(() => {
+        const storedReviews = JSON.parse(localStorage.getItem("reviews")) || [];
+        const driverReviews = storedReviews.filter((r) => r.driverId === Number(id));
+        setReviews(driverReviews);
+    }, [id]);
+
+    const handleReviewSubmit = (e) => {
         e.preventDefault();
-        if (rating < 1 || rating > 5) {
-            alert("Please select a rating between 1 and 5");
-            return;
-        }
+        const rating = e.target.rating.value;
+        const comment = e.target.comment.value;
 
-        try {
-            await saveDriverReview({ driverId, rating, comment });
-            setModalMessage("Review submitted successfully!");
-            setModalOpen(true);
+        const newReview = {
+            id: Date.now(),
+            driverId: Number(id),
+            driverName: driver.name,
+            rating: Number(rating),
+            comment,
+            date: new Date().toLocaleString(),
+        };
 
-            // Refresh reviews
-            const updatedReviews = await getDriverReviews(driverId);
-            setReviews(updatedReviews);
+        // Save to localStorage
+        const storedReviews = JSON.parse(localStorage.getItem("reviews")) || [];
+        const updatedReviews = [...storedReviews, newReview];
+        localStorage.setItem("reviews", JSON.stringify(updatedReviews));
 
-            // Clear form
-            setRating(0);
-            setComment("");
-        } catch (error) {
-            console.error("Error submitting review:", error);
-            alert("Failed to submit review. Please try again.");
-        }
+        // Update UI
+        setReviews([...reviews, newReview]);
+        setSuccessMsg("✅ Your review has been submitted!");
+
+        setTimeout(() => setSuccessMsg(""), 3000);
+        e.target.reset();
     };
 
-    return (
-        <div className="formArea">
-            <h1>Driver Review</h1>
-
-            <MessageModal
-                isOpen={modalOpen}
-                onClose={() => setModalOpen(false)}
-                message={modalMessage}
-            />
-
-            <form onSubmit={handleSubmit}>
-                <p>
-                    <label>Rating (1-5): </label>
-                    <select
-                        value={rating}
-                        onChange={(e) => setRating(Number(e.target.value))}
-                        required
-                        className="inputText"
-                    >
-                        <option value={0}>Select rating</option>
-                        {[1, 2, 3, 4, 5].map((num) => (
-                            <option key={num} value={num}>
-                                {num}
-                            </option>
-                        ))}
-                    </select>
-                </p>
-
-                <p>
-                    <label>Comment:</label>
-                    <textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        placeholder="Leave your comment..."
-                        rows={4}
-                        className="inputText"
-                    />
-                </p>
-
-                <button type="submit" className="task_addbutton">
-                    Submit Review
+    if (!driver) {
+        return (
+            <div className="review-container">
+                <p>No driver data found. Please go back to the map.</p>
+                <button className="back-btn" onClick={() => navigate(-1)}>
+                    Go Back
                 </button>
-            </form>
+            </div>
+        );
+    }
 
-            <hr />
+    return (
+        <div className="review-container">
+            <div className="review-card">
+                <img src={driver.profilePic} alt={driver.name} className="driver-pic" />
+                <h2>{driver.name}</h2>
+                <p><strong>Vehicle:</strong> {driver.vehicle}</p>
+                <p><strong>Languages:</strong> {driver.languages.join(", ")}</p>
+                <p><strong>Status:</strong> {driver.status}</p>
 
-            <h2>All Reviews</h2>
-            {loading ? (
-                <p>Loading reviews...</p>
-            ) : reviews.length === 0 ? (
-                <p>No reviews yet for this driver.</p>
-            ) : (
-                <table className="reviewTable">
-                    <thead>
-                    <tr>
-                        <th>Rating</th>
-                        <th>Comment</th>
-                        <th>Date</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {reviews.map((review) => (
-                        <tr key={review.id}>
-                            <td>{review.rating}</td>
-                            <td>{review.comment}</td>
-                            <td>
-                                {review.timestamp?.toDate
-                                    ? review.timestamp.toDate().toLocaleString()
-                                    : "N/A"}
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            )}
+                <hr />
+
+                <div className="review-list">
+                    <h3>Reviews</h3>
+                    {reviews.length > 0 ? (
+                        <ul>
+                            {reviews.map((rev) => (
+                                <li key={rev.id}>
+                                    <strong>⭐ {rev.rating}/5</strong> — {rev.comment}
+                                    <br />
+                                    <small>🕒 {rev.date}</small>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No reviews yet.</p>
+                    )}
+                </div>
+
+                <hr />
+
+                <div className="review-form">
+                    <h3>Leave a Review</h3>
+                    <form onSubmit={handleReviewSubmit}>
+                        <label>Rating (1–5):</label>
+                        <input name="rating" type="number" min="1" max="5" required />
+
+                        <label>Comment:</label>
+                        <textarea
+                            name="comment"
+                            placeholder={`Share your experience with ${driver.name}...`}
+                            required
+                        ></textarea>
+
+                        <button type="submit" className="submit-btn">Submit Review</button>
+                    </form>
+
+                    {successMsg && <p className="success-msg">{successMsg}</p>}
+                </div>
+
+                <div className="button-group">
+                    <button className="back-btn" onClick={() => navigate(-1)}>Back to Map</button>
+                    <button className="view-all-btn" onClick={() => navigate("/reviews")}>View All Reviews</button>
+                </div>
+            </div>
         </div>
     );
 }
