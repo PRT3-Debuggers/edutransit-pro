@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import "../assets/styles/MapWithPoints.css";
 
@@ -165,22 +166,23 @@ const points = [
         profilePic: 'https://randomuser.me/api/portraits/women/10.jpg',
     },
 ];
-
 export default function MapWithPoints() {
     const [selectedPoint, setSelectedPoint] = useState(null);
     const [map, setMap] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (map && selectedPoint) {
-            map.flyTo([selectedPoint.lat, selectedPoint.lng], 13, {
-                duration: 1.5,
-            });
+            map.flyTo([selectedPoint.lat, selectedPoint.lng], 13, { duration: 1.5 });
         }
     }, [selectedPoint, map]);
 
-    const handleMessageDriver = (e)=>{
-        e.preventDefault()
-    }
+    const handleMessageDriver = () => {
+        if (selectedPoint) {
+            // Navigate to review page with driver ID
+            navigate(`/reviews/${selectedPoint.id}`, { state: { driver: selectedPoint } });
+        }
+    };
 
     return (
         <div className="container">
@@ -203,15 +205,12 @@ export default function MapWithPoints() {
                     ))}
                 </MapContainer>
 
-                {/* List below map */}
                 <ul className="pointsList">
                     {points.map((point) => (
                         <li
                             key={point.id}
                             onClick={() => setSelectedPoint(point)}
-                            className={`pointItem ${
-                                selectedPoint?.id === point.id ? "selected" : ""
-                            }`}
+                            className={`pointItem ${selectedPoint?.id === point.id ? "selected" : ""}`}
                         >
                             <img
                                 src={point.profilePic}
@@ -226,9 +225,7 @@ export default function MapWithPoints() {
                                     border: "2px solid #007acc",
                                 }}
                             />
-                            <span style={{ verticalAlign: "middle", fontWeight: "600" }}>
-                {point.name}
-              </span>
+                            <span style={{ verticalAlign: "middle", fontWeight: "600" }}>{point.name}</span>
                             <br />
                             <span className="pointVehicle">{point.vehicle}</span>
                         </li>
@@ -236,7 +233,6 @@ export default function MapWithPoints() {
                 </ul>
             </div>
 
-            {/* Detail view */}
             <div className="detailView">
                 {selectedPoint ? (
                     <>
@@ -253,48 +249,19 @@ export default function MapWithPoints() {
                             }}
                         />
                         <h3>{selectedPoint.name}</h3>
-                        <p>
-                            <strong>Driver ID:</strong> {selectedPoint.id}
-                        </p>
-                        <p>
-                            <strong>Status:</strong> {selectedPoint.status}
-                        </p>
-                        <p>
-                            <strong>Vehicle:</strong> {selectedPoint.vehicle}
-                        </p>
-                        <p>
-                            <strong>Schools:</strong> {selectedPoint.schools.join(", ")}
-                        </p>
-                        <p>
-                            <strong>Languages:</strong> {selectedPoint.languages.join(", ")}
-                        </p>
-                        <p>
-                            <strong>Criminal Record:</strong>{" "}
-                            {selectedPoint.criminal_record ? "Yes" : "No"}
-                        </p>
-                        <p>
-                            <strong>Max Passengers:</strong> {selectedPoint.max_passengers}
-                        </p>
-                        <p>
-                            <strong>Available Seats:</strong> {selectedPoint.available_seats}
-                        </p>
-                        <p>
-                            <strong>Gender:</strong> {selectedPoint.gender}
-                        </p>
-                        <p>
-                            <strong>Race:</strong> {selectedPoint.race}
-                        </p>
-                        <p>
-                            <strong>Latitude:</strong> {selectedPoint.lat}
-                        </p>
-                        <p>
-                            <strong>Longitude:</strong> {selectedPoint.lng}
-                        </p>
-                        <input
-                            type={"submit"}
-                            value={"Message Driver"}
-                            onClick={handleMessageDriver}
-                        />
+                        <p><strong>Driver ID:</strong> {selectedPoint.id}</p>
+                        <p><strong>Status:</strong> {selectedPoint.status}</p>
+                        <p><strong>Vehicle:</strong> {selectedPoint.vehicle}</p>
+                        <p><strong>Schools:</strong> {selectedPoint.schools.join(", ")}</p>
+                        <p><strong>Languages:</strong> {selectedPoint.languages.join(", ")}</p>
+                        <p><strong>Criminal Record:</strong> {selectedPoint.criminal_record ? "Yes" : "No"}</p>
+                        <p><strong>Max Passengers:</strong> {selectedPoint.max_passengers}</p>
+                        <p><strong>Available Seats:</strong> {selectedPoint.available_seats}</p>
+                        <p><strong>Gender:</strong> {selectedPoint.gender}</p>
+                        <p><strong>Race:</strong> {selectedPoint.race}</p>
+                        <p><strong>Latitude:</strong> {selectedPoint.lat}</p>
+                        <p><strong>Longitude:</strong> {selectedPoint.lng}</p>
+                        <button onClick={handleMessageDriver}>Message Driver</button>
                     </>
                 ) : (
                     <p>Select a driver to view details</p>

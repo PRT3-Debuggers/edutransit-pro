@@ -82,3 +82,20 @@ main {
   color: #000;
   text-decoration: underline;
 }
+
+.reviewTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.reviewTable th,
+.reviewTable td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.reviewTable th {
+  background-color: #f5f5f5;
+}
