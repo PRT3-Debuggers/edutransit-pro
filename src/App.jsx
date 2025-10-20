@@ -13,6 +13,7 @@ import Profile from "./components/Profile.jsx";
 import DriverReview from "./components/DriverReview.jsx";
 import AllReview from "./components/AllReview.jsx";
 import FileTicket from "./components/FileTicket.jsx";
+import ViewTickets from "./components/ViewTickets.jsx";
 
 function App() {
     return (
@@ -22,6 +23,7 @@ function App() {
                 {/*<Route path="/" element={</>}/>*/}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/tickets" element={<FileTicket />} />
+                <Route path="/tickets/view" element={<ViewTickets />} />
                 <Route path="/profile" element={<Profile/>}/>
                 <Route path="/about" element={<About/>}/>
                 <Route path="/drivers" element={<Drivers/>}/>
