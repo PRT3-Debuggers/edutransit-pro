@@ -49,6 +49,7 @@ const FileTicket = () => {
       email: user.emailAddress,
       uid: user.id,
       status: "open",
+      dateCreated: new Date().toISOString(),
     };
 
     console.log("Ticket submitted:", ticketData);

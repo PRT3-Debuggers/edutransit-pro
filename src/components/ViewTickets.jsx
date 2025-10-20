@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { getDocumentsByField } from "../firebase/firebase.js";
+import { getDocumentsByField,deleteDocument } from "../firebase/firebase.js";
 
 const UserTickets = () => {
   const storedUser = JSON.parse(sessionStorage.getItem("userData")) || {};
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userid, setUserid] = useState(storedUser.id || "");
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -14,6 +15,7 @@ const UserTickets = () => {
       console.log("Fetching tickets for user ID:", user.id);
       try {
         setLoading(true);
+        setUserid(user.id);
         const docs = await getDocumentsByField("tickets", "uid", user.id);
         console.log("Fetched tickets:", docs);
         setTickets(docs);
@@ -97,6 +99,22 @@ const UserTickets = () => {
     },
   };
 
+  const handleDelete = (ticket) => {
+    if (window.confirm("Are you sure you want to delete this ticket?")) {
+      if(ticket.uid !== userid){
+        alert("You can only delete your own tickets.");
+        return;
+      }
+      deleteDocument("tickets", ticket.id)
+        .then(() => {
+          alert("Ticket deleted successfully.");
+          setTickets(prevTickets => prevTickets.filter(t => t.id !== ticket.id));
+        })
+        .catch((error) => {
+          console.error("Error deleting ticket:", error);
+        });
+  }}
+
   return (
     <div style={styles.page}>
       <div style={styles.container}>
@@ -131,7 +149,7 @@ const UserTickets = () => {
                 {ticket.status ? ticket.status.toUpperCase() : "OPEN"}
               </span>
             </p>
-
+              <button style={styles.status}  onClick={() => handleDelete(ticket)}>Delete Ticket</button>
             </div>
           ))
         )}
