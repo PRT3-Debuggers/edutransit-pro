@@ -285,6 +285,7 @@ export default function MapWithPoints() {
     const raceOptions = ["", "black", "white", "coloured", "indian"];
     const languageOptions = ["", "English", "Afrikaans", "Zulu", "Xhosa", "Sotho", "Arabic", "Urdu"];
     const genderOptions = ["male", "female"];
+    const criminal_recordOptions = ["", "true", "false"];
 
     const handleReset = () => {
         setFilters({});
@@ -356,7 +357,15 @@ export default function MapWithPoints() {
                 {genderOptions.map(opt => <option key={opt} value={opt}>{opt || "Genders"}</option>)}
             </select>
 
-            {["vehicle", "schools", "criminal_record", "max_passengers", "available_seats"].map(field => (
+            <select
+                value={filters.criminal_record || ""}
+                onChange={e => handleChange("criminal_record", e.target.value)}
+                style={selectStyle}
+            >
+                {criminal_recordOptions.map(opt => <option key={opt} value={opt}>{opt || "Criminal Reocrd"}</option>)}
+            </select>
+
+            {["vehicle", "schools", "max_passengers", "available_seats"].map(field => (
                 <input
                     key={field}
                     type="text"
