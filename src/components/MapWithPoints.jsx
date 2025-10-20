@@ -254,7 +254,10 @@ export default function MapWithPoints() {
     );
 }
 
-function FilterBar({ filters, setFilters, onApply }) {
+ function FilterBar({ filters, setFilters, onApply }) {
+    const [locationQuery, setLocationQuery] = useState("");
+    const [suggestions, setSuggestions] = useState([]);
+
     const handleChange = (field, value) => setFilters(prev => ({ ...prev, [field]: value }));
 
     const inputStyle = {
@@ -270,7 +273,7 @@ function FilterBar({ filters, setFilters, onApply }) {
         padding: "6px 16px",
         borderRadius: 6,
         border: "none",
-        backgroundColor: "#000000ff",
+        backgroundColor: "#000",
         color: "#fff",
         cursor: "pointer",
         fontSize: 14
@@ -278,16 +281,37 @@ function FilterBar({ filters, setFilters, onApply }) {
 
     const selectStyle = { ...inputStyle };
 
-    // Options for select fields
     const statusOptions = ["", "Available", "Unavailable"];
     const raceOptions = ["", "black", "white", "coloured", "indian"];
     const languageOptions = ["", "English", "Afrikaans", "Zulu", "Xhosa", "Sotho", "Arabic", "Urdu"];
+    const genderOptions = ["male", "female"];
 
-    // Reset function
     const handleReset = () => {
-        //setFilters({});
-       // onApply(); 
-       window.location.reload();
+        setFilters({});
+        setLocationQuery("");
+        onApply();
+    };
+
+    // Fetch suggestions from OpenStreetMap Nominatim API
+    const handleLocationSearch = async (query) => {
+        setLocationQuery(query);
+        if (!query) return setSuggestions([]);
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`);
+            const data = await res.json();
+            setSuggestions(data.slice(0, 5)); // show top 5 suggestions
+        } catch (error) {
+            console.error("Error fetching location:", error);
+            setSuggestions([]);
+        }
+    };
+
+    const handleSelectLocation = (place) => {
+        handleChange("lat", place.lat);
+        handleChange("lng", place.lon);
+        setLocationQuery(place.display_name);
+        setSuggestions([]);
     };
 
     return (
@@ -296,7 +320,8 @@ function FilterBar({ filters, setFilters, onApply }) {
             flexWrap: "wrap",
             gap: "0.5rem",
             justifyContent: "flex-start",
-            marginBottom: "1rem"
+            marginBottom: "1rem",
+            position: "relative"
         }}>
             <select
                 value={filters.status || ""}
@@ -322,10 +347,16 @@ function FilterBar({ filters, setFilters, onApply }) {
                 {languageOptions.map(opt => <option key={opt} value={opt}>{opt || "Languages"}</option>)}
             </select>
 
-            {[
-                "vehicle", "schools", "criminal_record",
-                "max_passengers", "available_seats", "gender", "lat", "lng"
-            ].map(field => (
+            
+            <select
+                value={filters.gender || ""}
+                onChange={e => handleChange("gender", e.target.value)}
+                style={selectStyle}
+            >
+                {genderOptions.map(opt => <option key={opt} value={opt}>{opt || "Genders"}</option>)}
+            </select>
+
+            {["vehicle", "schools", "criminal_record", "max_passengers", "available_seats"].map(field => (
                 <input
                     key={field}
                     type="text"
@@ -336,11 +367,54 @@ function FilterBar({ filters, setFilters, onApply }) {
                 />
             ))}
 
+            {/* Location search input */}
+            {/* <div style={{ position: "relative" }}>
+                <input
+                    type="text"
+                    placeholder="Search Location"
+                    value={locationQuery}
+                    onChange={(e) => handleLocationSearch(e.target.value)}
+                    style={{ ...inputStyle, width: 200 }}
+                />
+                {suggestions.length > 0 && (
+                    <ul style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: 0,
+                        width: "100%",
+                        backgroundColor: "#fff",
+                        border: "1px solid #ccc",
+                        borderRadius: 4,
+                        maxHeight: 150,
+                        overflowY: "auto",
+                        zIndex: 1000,
+                        listStyle: "none",
+                        padding: 0,
+                        margin: 0
+                    }}>
+                        {suggestions.map(place => (
+                            <li
+                                key={place.place_id}
+                                onClick={() => handleSelectLocation(place)}
+                                style={{
+                                    padding: "6px 10px",
+                                    cursor: "pointer",
+                                    borderBottom: "1px solid #eee"
+                                }}
+                            >
+                                {place.display_name}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div> */}
+
             <button onClick={onApply} style={buttonStyle}>Filter</button>
             <button onClick={handleReset} style={{ ...buttonStyle, backgroundColor: "#888" }}>Reset</button>
         </div>
     );
 }
+
 
 
 function DriverCard({ name, profilePic, onClick, selected }) {
