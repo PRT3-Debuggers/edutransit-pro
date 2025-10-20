@@ -43,6 +43,13 @@ export default function Profile() {
         }
     };
 
+    const handleGoToSubmitTicket = () => {
+        navigate("/tickets");
+    };
+    const handleGoToMyTickets = () => {
+        navigate("/tickets/view");
+    };
+
     if (loading) {
         return (
             <div className="profileContainer">
@@ -146,6 +153,18 @@ export default function Profile() {
                         className="profileButton deleteButton"
                     >
                         Delete Account
+                    </button>
+                    <button 
+                        onClick={handleGoToSubmitTicket} 
+                        className="profileButton logoutButton"
+                    >
+                        Submit a Ticket
+                    </button>
+                    <button 
+                        onClick={handleGoToMyTickets} 
+                        className="profileButton editButton"
+                    >
+                        My Tickets
                     </button>
                 </div>
             </div>

@@ -2,8 +2,10 @@
 import React from 'react';
 import SchoolBus from '/SchoolBus.png';
 import '../assets/styles/Main.css';
+import { useNavigate } from "react-router-dom";
 
 export default function MainSection() {
+        const navigate = useNavigate();
     return (
         <div className="main-container">
             <div className="main-text">
@@ -15,9 +17,7 @@ export default function MainSection() {
                     Join our growing network and experience a smarter way to manage school transportation.
                 </p>
                 <div className="main-buttons">
-                    <button onClick={() => alert('Finding available transport...')}>Find Transport</button>
-                    <button onClick={() => alert('Redirecting to registration...')}>Register Vehicle</button>
-                    <button onClick={() => alert('Available for Bookings...')}>Book Now</button>
+                    <button onClick={() => navigate("/finddriver")}>Find Transport</button>
                 </div>
             </div>
 
