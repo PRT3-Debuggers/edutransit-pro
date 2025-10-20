@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import "../assets/styles/MapWithPoints.css";
-
+import {Tooltip} from 'react-leaflet/Tooltip';
 const points = [
     {
         id: 1,
@@ -172,6 +172,7 @@ export default function MapWithPoints() {
     const [filters, setFilters] = useState({});
     const [appliedFilters, setAppliedFilters] = useState({});
     const navigate = useNavigate();
+  const [hoveredDriver, setHoveredDriver] = useState(null);
 
     useEffect(() => {
         if (map && selectedPoint) {
@@ -215,13 +216,29 @@ export default function MapWithPoints() {
                     >
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         {filteredPoints.map((point) => (
-                            <Marker
-                                key={point.id}
-                                position={[point.lat, point.lng]}
-                                eventHandlers={{ click: () => setSelectedPoint(point) }}
-                            >
-                                <Popup>{point.name}</Popup>
-                            </Marker>
+                    <Marker
+                    key={point.id}
+                    position={[point.lat, point.lng]}
+                    eventHandlers={{
+                        click: () => setSelectedPoint(point),
+                        mouseover: () => setHoveredDriver(point),
+                        mouseout: () => setHoveredDriver(null),
+                    }}
+                    >
+                    <Tooltip
+                        direction="top"
+                        offset={[0, -10]}
+                        opacity={1}
+                        permanent={hoveredDriver?.id === point.id} // only visible while hovered
+                    >
+                        <DriverCard
+                        name={point.name}
+                        profilePic={point.profilePic}
+                        />
+                    </Tooltip>
+                    </Marker>
+
+
                         ))}
                     </MapContainer>
 
@@ -342,7 +359,7 @@ function FilterBar({ filters, setFilters, onApply }) {
         padding: "6px 16px",
         borderRadius: 6,
         border: "none",
-        backgroundColor: "#007acc",
+        backgroundColor: "#000000ff",
         color: "#fff",
         cursor: "pointer",
         fontSize: 14
@@ -404,5 +421,37 @@ function FilterBar({ filters, setFilters, onApply }) {
             <button onClick={onApply} style={buttonStyle}>Filter</button>
         </div>
     );
+}
+
+function DriverCard({ name, profilePic, onClick, selected }) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "8px 12px",
+        borderRadius: 8,
+        cursor: "pointer",
+        backgroundColor: selected ? "#e0f7fa" : "#f5f5f5",
+        border: selected ? "2px solid #007acc" : "2px solid transparent",
+        transition: "all 0.2s ease",
+      }}
+    >
+      <img
+        src={profilePic}
+        alt={name}
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          objectFit: "cover",
+          border: "2px solid #007acc",
+        }}
+      />
+      <span style={{ fontWeight: 600, color: "#333" }}>{name}</span>
+    </div>
+  );
 }
 
