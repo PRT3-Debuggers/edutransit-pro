@@ -9,8 +9,9 @@ import SignUp from "./components/SignUp.jsx";
 import Login from "./components/Login.jsx";
 import Navigation from "./components/Navigation.jsx";
 import MapWithPoints from "./components/MapWithPoints.jsx";
-import CompleteProfile from "./components/CompleteProfile.jsx";
 import Profile from "./components/Profile.jsx";
+import DriverReview from "./components/DriverReview.jsx";
+import AllReview from "./components/AllReview.jsx";
 import FileTicket from "./components/FileTicket.jsx";
 
 function App() {
@@ -28,6 +29,8 @@ function App() {
                 <Route path="/signup" element={<SignUp/>}/>
                 <Route path="/login" element={<Login />} />
                 <Route path="/finddriver" element={<MapWithPoints/>}/>
+                <Route path="/reviews/:id" element={<DriverReview />} />
+                <Route path="/reviews" element={<AllReview />} />
             </Routes>
         </BrowserRouter>
     );
