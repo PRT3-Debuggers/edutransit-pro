@@ -75,9 +75,15 @@ export default function MapWithPoints() {
         }
     }, [selectedPoint, map]);
 
-    const handleMessageDriver = () => {
+    const handleReviewDriver = () => {
         if (selectedPoint) {
             navigate(`/reviews/${selectedPoint.id}`, { state: { driver: selectedPoint } });
+        }
+    };
+
+    const handleMessageDriver = () => {
+        if (selectedPoint) {
+            navigate(`/messagedriver/${selectedPoint.id}`, { state: { driver: selectedPoint } });
         }
     };
 
@@ -221,12 +227,22 @@ export default function MapWithPoints() {
                             <p><strong>Race:</strong> {selectedPoint.race}</p>
                             <p><strong>Latitude:</strong> {selectedPoint.lat}</p>
                             <p><strong>Longitude:</strong> {selectedPoint.lng}</p>
+                            <button onClick={handleReviewDriver} style={{
+                                marginTop: "0.5rem",
+                                padding: "8px 16px",
+                                borderRadius: 6,
+                                border: "none",
+                                backgroundColor: "#000000ff",
+                                color: "#fff",
+                                cursor: "pointer"
+                            }}>Review Driver</button>
+                            <br/>
                             <button onClick={handleMessageDriver} style={{
                                 marginTop: "0.5rem",
                                 padding: "8px 16px",
                                 borderRadius: 6,
                                 border: "none",
-                                backgroundColor: "#007acc",
+                                backgroundColor: "#000000ff",
                                 color: "#fff",
                                 cursor: "pointer"
                             }}>Message Driver</button>
