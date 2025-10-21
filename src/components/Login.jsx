@@ -17,16 +17,34 @@ export default function Login() {
         }
 
         try {
+            console.log("Step 1: Attempting Firebase Auth login...");
             const userData = await loginUser(userEmail, userPassword);
+            console.log("Firebase Auth successful:", userData.email);
+            
+            console.log("Step 2: Querying Firestore for user data...");
             const realUserData = await getDocumentsByField("user-data", "emailAddress", userData.email);
-            console.log("Login successful:", userData.email);
-
+            console.log("Firestore query result:", realUserData);
+            console.log("Result length:", realUserData.length);
+            console.log("First user object:", realUserData[0]);
+            console.log("User object keys:", realUserData[0] ? Object.keys(realUserData[0]) : "No data");
+            
+            if (realUserData.length === 0) {
+                console.error("No user data found in Firestore!");
+                alert("No user data found. Please sign up first or contact support.");
+                return;
+            }
+            
+            console.log("Step 3: Storing data in session storage...");
             sessionStorage.setItem("userData", JSON.stringify(realUserData));
+            console.log("Data stored in session storage");
+            
+            console.log("Step 4: Navigating to profile...");
             setModalOpen(true);
             navigate('/profile');
         } catch (error) {
             console.error("Login failed:", error);
-            alert("Login failed. Please check your credentials.");
+            console.error("Error details:", error.message);
+            alert("Login failed: " + error.message);
         }
     };
 

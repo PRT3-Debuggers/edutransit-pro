@@ -10,6 +10,7 @@ import Login from "./components/Login.jsx";
 import Navigation from "./components/Navigation.jsx";
 import MapWithPoints from "./components/MapWithPoints.jsx";
 import Profile from "./components/Profile.jsx";
+import EditProfile from "./components/EditProfile.jsx";
 import DriverReview from "./components/DriverReview.jsx";
 import AllReview from "./components/AllReview.jsx";
 import FileTicket from "./components/FileTicket.jsx";
@@ -25,6 +26,7 @@ function App() {
                 <Route path="/tickets" element={<FileTicket />} />
                 <Route path="/tickets/view" element={<ViewTickets />} />
                 <Route path="/profile" element={<Profile/>}/>
+                <Route path="/edit-profile" element={<EditProfile/>}/>
                 <Route path="/about" element={<About/>}/>
                 <Route path="/drivers" element={<Drivers/>}/>
                 <Route path="/privacy" element={<PrivacyPolicy/>}/>
