@@ -7,6 +7,7 @@ import Drivers from './pages/Drivers';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import SignUp from "./components/SignUp.jsx";
 import Login from "./components/Login.jsx";
+import DriverProfile from './components/DriverProfile.jsx';
 import Navigation from "./components/Navigation.jsx";
 import MapWithPoints from "./components/MapWithPoints.jsx";
 import CompleteProfile from "./components/CompleteProfile.jsx";
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/signup" element={<SignUp/>}/>
                 <Route path="/login" element={<Login />} />
                 <Route path="/finddriver" element={<MapWithPoints/>}/>
+                <Route path="/driverprofile" element={<DriverProfile/>}/>
             </Routes>
         </BrowserRouter>
     );

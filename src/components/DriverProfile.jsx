@@ -90,7 +90,7 @@ export default function DriverProfile(){
             navigate("/login");
         }
     }
-};
+
 
 if (loading) {
     return <div>Loading...</div>;
@@ -98,7 +98,7 @@ if (loading) {
 
 const styles = {
     formArea: {
-        width: "100%",
+      width: "100%",
       maxWidth: 400,
       margin: "5vh auto",
       display: "flex",
@@ -190,4 +190,5 @@ return (
         <button onClick={handleSaveDriver}>Save Driver Profile</button>
         </form>
     </div>
-)
+    );
+};
