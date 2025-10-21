@@ -63,64 +63,104 @@ const points = [
   { id: 50, name: 'Nico Botha', lat: -33.9155, lng: 18.4305, status: 'Available', schools: ['Claremont Primary'], vehicle: 'VW Golf', languages: ['English','Afrikaans'], criminal_record: false, max_passengers: 3, gender: 'male', race: 'coloured', available_seats: 2, profilePic: 'https://randomuser.me/api/portraits/men/50.jpg' },
 ];
 
-const ReviewsList = ({reviews}) => {
-  // Helper to render stars
-  const renderStars = (rating) => {
-    return (
-      <div style={{ color: "#f5c518" }}>
-        {Array.from({ length: 5 }, (_, i) => (
-          <span key={i}>{i < rating ? "★" : "☆"}</span>
-        ))}
-      </div>
-    );
-  };
-
-  const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp.seconds * 1000);
-    return date.toLocaleString();
-  };
-
-  return (
-    <div style={styles.container}>
-      {reviews.map((review) => (
-        <div key={review.id} style={styles.card}>
-          <h3 style={styles.name}>{review.driverName}</h3>
-          {renderStars(review.rating)}
-          <p style={styles.comment}>{review.comment}</p>
-          <small style={styles.timestamp}>
-            {formatTimestamp(review.timestamp)}
-          </small>
-        </div>
-      ))}
-    </div>
-  );
+const ReviewsList = ({ reviews }) => {
+// Helper to render stars
+const renderStars = (rating) => {
+return (
+<div style={{ color: "#f5c518" }}>
+{Array.from({ length: 5 }, (_, i) => ( <span key={i}>{i < rating ? "★" : "☆"}</span>
+))} </div>
+);
 };
 
+const formatTimestamp = (timestamp) => {
+if (!timestamp?.seconds) return "N/A";
+const date = new Date(timestamp.seconds * 1000);
+return date.toLocaleString();
+};
+
+return ( <div style={styles.container}> <div style={styles.scrollArea}>
+{reviews.map((review) => ( <div key={review.id} style={styles.card}> <div style={styles.header}> <h3 style={styles.name}>{review.driverName}</h3> <span style={styles.driverId}>ID: {review.driverId}</span> </div>
+{renderStars(review.rating)} <p style={styles.comment}>{review.comment}</p> <small style={styles.timestamp}>
+{formatTimestamp(review.timestamp)} </small> </div>
+))} </div> </div>
+);
+};
+
+// 💅 Inline styles
 const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    padding: "20px",
-  },
-  card: {
-    border: "1px solid #ddd",
-    borderRadius: "10px",
-    padding: "15px",
-    backgroundColor: "#fff",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-  },
-  name: {
-    marginBottom: "5px",
-  },
-  comment: {
-    margin: "8px 0",
-    fontStyle: "italic",
-  },
-  timestamp: {
-    color: "#777",
-  },
+container: {
+display: "flex",
+justifyContent: "center",
+width: "100%",
+maxWidth: "600px",
+margin: "0 auto",
+},
+scrollArea: {
+height: "500px", // 👈 controls how tall the scroll area is
+overflowY: "auto",
+paddingRight: "8px",
+width: "100%",
+},
+card: {
+backgroundColor: "#fff",
+borderRadius: "10px",
+boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+padding: "15px",
+marginBottom: "15px",
+},
+header: {
+display: "flex",
+justifyContent: "space-between",
+alignItems: "center",
+marginBottom: "5px",
+},
+name: {
+margin: 0,
+fontSize: "16px",
+fontWeight: "600",
+},
+driverId: {
+fontSize: "12px",
+color: "#888",
+},
+comment: {
+marginTop: "5px",
+fontSize: "14px",
+},
+timestamp: {
+display: "block",
+marginTop: "5px",
+fontSize: "12px",
+color: "#777",
+},
 };
+
+// const styles = {
+//   container: {
+//     display: "flex",
+//     flexDirection: "column",
+//     gap: "15px",
+//     padding: "20px",
+//   },
+//   card: {
+//     border: "1px solid #ddd",
+//     borderRadius: "10px",
+//     padding: "15px",
+//     backgroundColor: "#fff",
+//     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+//   },
+//   name: {
+//     marginBottom: "5px",
+//   },
+//   comment: {
+//     margin: "8px 0",
+//     fontStyle: "italic",
+//   },
+//   timestamp: {
+//     color: "#777",
+//   },
+// };
 
 export default function MapWithPoints() {
     const [selectedPoint, setSelectedPoint] = useState(null);
@@ -282,8 +322,8 @@ export default function MapWithPoints() {
   {/* LEFT: Driver Info */}
   <div style={{ flex: 1, minWidth: 250 }}>
     <img
-      src={selectedPoint.profilePic}
-      alt={selectedPoint.name}
+      src={selectedPoint?.profilePic || "https://via.placeholder.com/80"}
+      alt={selectedPoint?.name}
       style={{
         width: 80,
         height: 80,
@@ -293,16 +333,16 @@ export default function MapWithPoints() {
         marginBottom: "1rem",
       }}
     />
-    <h3>{selectedPoint.name}</h3>
-    <p><strong>Status:</strong> {selectedPoint.status}</p>
-    <p><strong>Vehicle:</strong> {selectedPoint.vehicle}</p>
-    <p><strong>Schools:</strong> {selectedPoint.schools.join(", ")}</p>
-    <p><strong>Languages:</strong> {selectedPoint.languages.join(", ")}</p>
-    <p><strong>Criminal Record:</strong> {selectedPoint.criminal_record ? "Yes" : "No"}</p>
-    <p><strong>Max Passengers:</strong> {selectedPoint.max_passengers}</p>
-    <p><strong>Available Seats:</strong> {selectedPoint.available_seats}</p>
-    <p><strong>Gender:</strong> {selectedPoint.gender}</p>
-    <p><strong>Race:</strong> {selectedPoint.race}</p>
+    <h3>{selectedPoint?.name}</h3>
+    <p><strong>Status:</strong> {selectedPoint?.status}</p>
+    <p><strong>Vehicle:</strong> {selectedPoint?.vehicle}</p>
+    <p><strong>Schools:</strong> {selectedPoint?.schools.join(", ")}</p>
+    <p><strong>Languages:</strong> {selectedPoint?.languages.join(", ")}</p>
+    <p><strong>Criminal Record:</strong> {selectedPoint?.criminal_record ? "Yes" : "No"}</p>
+    <p><strong>Max Passengers:</strong> {selectedPoint?.max_passengers}</p>
+    <p><strong>Available Seats:</strong> {selectedPoint?.available_seats}</p>
+    <p><strong>Gender:</strong> {selectedPoint?.gender}</p>
+    <p><strong>Race:</strong> {selectedPoint?.race}</p>
 
     <button onClick={handleReviewDriver} style={{
       marginTop: "0.5rem",
