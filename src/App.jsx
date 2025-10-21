@@ -37,10 +37,10 @@ function App() {
                 <Route path="/reviews/:id" element={<DriverReview />} />
                 <Route path="/reviews" element={<AllReview />} />
                <Route path="/messagedriver/:driverId/:parentId" element={<ChatPage />} />
+
             </Routes>
         </BrowserRouter>
     );
 }
 
 export default App;
-// --- IGNORE ---
