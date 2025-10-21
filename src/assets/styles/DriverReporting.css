@@ -1,0 +1,85 @@
+.driver-reporting-container {
+  max-width: 720px;
+  margin: 3rem auto;
+  padding: 20px;
+}
+
+.driver-reporting-title {
+  margin-bottom: 16px;
+}
+
+.driver-reporting-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  padding: 8px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.form-input:read-only {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.submit-button,
+.cancel-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.submit-button {
+  background: #000;
+  color: #fff;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #333;
+}
+
+.submit-button.submitting {
+  background: #666;
+  cursor: default;
+}
+
+.submit-button:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  background: #eee;
+  border: 1px solid #ccc;
+  color: #333;
+}
+
+.cancel-button:hover {
+  background: #e0e0e0;
+}
