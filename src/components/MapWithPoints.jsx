@@ -82,10 +82,11 @@ export default function MapWithPoints() {
     };
 
     const handleMessageDriver = () => {
-    if (selectedPoint) {
-        const currentUserId = "Parent123";
-        navigate(`/messagedriver/${selectedPoint.id}/${currentUserId}`, { state: { driver: selectedPoint } });
-    }
+  if (!selectedPoint) return;
+  const parentId= "Parent123"; 
+  navigate(`/messagedriver/${selectedPoint.id}/${parentId}`, {
+  state: { role: "parent", userId: parentId }
+});
 };
 
     const filteredPoints = points.filter(point => {
@@ -131,7 +132,7 @@ export default function MapWithPoints() {
                         direction="top"
                         offset={[0, -10]}
                         opacity={1}
-                        permanent={hoveredDriver?.id === point.id} // only visible while hovered
+                        permanent={hoveredDriver?.id === point.id} 
                     >
                         <DriverCard
                         name={point.name}
