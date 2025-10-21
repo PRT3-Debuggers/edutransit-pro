@@ -251,7 +251,6 @@ export default function MapWithPoints() {
             </div>
         </div>
     );
-}
 
  function FilterBar({ filters, setFilters, onApply }) {
     const [locationQuery, setLocationQuery] = useState("");

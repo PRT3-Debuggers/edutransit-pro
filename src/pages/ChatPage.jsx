@@ -8,6 +8,7 @@ import {
   onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
+
 import "../assets/styles/Chat.css";
 
 const ChatPage = () => {
