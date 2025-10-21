@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import "../assets/styles/DriverReview.css";
 import { saveDriverReview, getDriverReviews } from "../firebase/firebase.js";
-
+import { getAuth } from "firebase/auth";
 
 const drivers = [
     { id: 1, name: "John Doe", vehicle: "Renault Clio", languages: ["English", "Afrikaans"], status: "Available", profilePic: "https://randomuser.me/api/portraits/men/1.jpg" },
@@ -21,10 +21,12 @@ export default function DriverReview() {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
+    const auth = getAuth();
 
     const [driver, setDriver] = useState(location.state?.driver || null);
     const [reviews, setReviews] = useState([]);
     const [successMsg, setSuccessMsg] = useState("");
+    const [showAlert, setShowAlert] = useState(false);
 
     // Load driver info
     useEffect(() => {
@@ -49,22 +51,42 @@ export default function DriverReview() {
         const rating = e.target.rating.value;
         const comment = e.target.comment.value;
 
+        // Get current user
+        const user = auth.currentUser;
+        if (!user) {
+            setSuccessMsg("❌ You must be logged in to submit a review.");
+            setTimeout(() => setSuccessMsg(""), 3000);
+            return;
+        }
+
         const newReview = {
             driverId: Number(id),
             driverName: driver.name,
             rating: Number(rating),
             comment,
+            userId: user.uid, // Add user ID to the review
+            userEmail: user.email, // Optional: also save user email for display
+            timestamp: new Date() // Add timestamp on client side
         };
 
         try {
             await saveDriverReview(newReview);
-            setSuccessMsg("✅ Your review has been submitted!");
-            setReviews((prev) => [newReview, ...prev]);
+
+            // Show success alert
+            setShowAlert(true);
+            setTimeout(() => setShowAlert(false), 1000); // Hide after 1 second
+
+            // Also show success message for longer
+            setSuccessMsg("✅ Your review has been submitted successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
+
+            // Refresh reviews
+            const driverReviews = await getDriverReviews(Number(id));
+            setReviews(driverReviews);
+
             e.target.reset();
         } catch (error) {
             console.error("Error submitting review:", error);
-            setSuccessMsg("❌ Failed to submit review. Try again.");
             setTimeout(() => setSuccessMsg(""), 3000);
         }
     };
@@ -82,6 +104,13 @@ export default function DriverReview() {
 
     return (
         <div className="review-container">
+            {/* Success Alert */}
+            {showAlert && (
+                <div className="alert-success">
+                    ✅ Review saved successfully!
+                </div>
+            )}
+
             <div className="review-card">
                 <img src={driver.profilePic} alt={driver.name} className="driver-pic" />
                 <h2>{driver.name}</h2>
@@ -103,7 +132,8 @@ export default function DriverReview() {
                                         🕒{" "}
                                         {rev.timestamp?.toDate
                                             ? rev.timestamp.toDate().toLocaleString()
-                                            : ""}
+                                            : new Date(rev.timestamp).toLocaleString()}
+                                        {rev.userEmail && ` • by ${rev.userEmail}`}
                                     </small>
                                 </li>
                             ))}
