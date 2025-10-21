@@ -81,12 +81,11 @@ export default function MapWithPoints() {
         }
     };
 
-    const handleMessageDriver = () => {
-        if (selectedPoint) {
-            navigate(`/messagedriver/${selectedPoint.id}`, { state: { driver: selectedPoint } });
-        }
-    };
-
+    const currentUserId = "Parent123"; 
+    if (selectedPoint) {
+        navigate(`/messagedriver/${selectedPoint.id}/${currentUserId}`, { state: { driver: selectedPoint } });
+    }
+};
     const filteredPoints = points.filter(point => {
         return Object.entries(appliedFilters).every(([key, value]) => {
             if (!value) return true;
