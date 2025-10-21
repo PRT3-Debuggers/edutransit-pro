@@ -8,21 +8,26 @@ import {
   onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
-
 import "../assets/styles/Chat.css";
 
 const ChatPage = () => {
   const [driverMessage, setDriverMessage] = useState("");
   const [parentMessage, setParentMessage] = useState("");
   const [messages, setMessages] = useState([]);
-
-  const parentEndRef = useRef(null);
-  const driverEndRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   const driverId = "driver1";
   const parentId = "parent1";
   const chatId = [driverId, parentId].sort().join("_");
 
+  // Auto-scroll when new messages appear
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  // Listen for new messages
   useEffect(() => {
     const q = query(
       collection(db, "chats", chatId, "messages"),
@@ -36,22 +41,13 @@ const ChatPage = () => {
     return () => unsubscribe();
   }, [chatId]);
 
-  useEffect(() => {
-    if (parentEndRef.current) {
-      parentEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-
-  useEffect(() => {
-    if (driverEndRef.current) {
-      driverEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-
-  const sendParentMessage = async () => {
+  // Parent send
+  const sendParentMessage = async (e) => {
+    e.preventDefault();
     if (!parentMessage.trim()) return;
+
     const message = parentMessage;
-    setParentMessage("");
+    setParentMessage(""); // instantly clear input box for smoother UX
 
     await addDoc(collection(db, "chats", chatId, "messages"), {
       text: message,
@@ -60,10 +56,13 @@ const ChatPage = () => {
     });
   };
 
-  const sendDriverMessage = async () => {
+  // Driver send
+  const sendDriverMessage = async (e) => {
+    e.preventDefault();
     if (!driverMessage.trim()) return;
+
     const message = driverMessage;
-    setDriverMessage("");
+    setDriverMessage(""); // instantly clear input box
 
     await addDoc(collection(db, "chats", chatId, "messages"), {
       text: message,
@@ -84,7 +83,7 @@ const ChatPage = () => {
 
   return (
     <div className="chat-wrapper split">
-      {/* Parent Box */}
+      {/* Parent Box (Left) */}
       <div className="chat-container">
         <div className="chat-header">Parent Chat</div>
         <div className="chat-box">
@@ -93,29 +92,20 @@ const ChatPage = () => {
               {msg.text}
             </div>
           ))}
-          <div ref={parentEndRef} />
+          <div ref={messagesEndRef} />
         </div>
-
-        <div className="chat-input">
+        <form onSubmit={sendParentMessage} className="chat-input">
           <input
             type="text"
             placeholder="Parent type a message..."
             value={parentMessage}
             onChange={(e) => setParentMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                sendParentMessage();
-              }
-            }}
           />
-          <button type="button" onClick={sendParentMessage}>
-            Send
-          </button>
-        </div>
+          <button type="submit">Send</button>
+        </form>
       </div>
 
-      {/* Driver Box */}
+      {/* Driver Box (Right) */}
       <div className="chat-container">
         <div className="chat-header">Driver Chat</div>
         <div className="chat-box">
@@ -124,30 +114,20 @@ const ChatPage = () => {
               {msg.text}
             </div>
           ))}
-          <div ref={driverEndRef} />
+          <div ref={messagesEndRef} />
         </div>
-
-        <div className="chat-input">
+        <form onSubmit={sendDriverMessage} className="chat-input">
           <input
             type="text"
             placeholder="Driver type a message..."
             value={driverMessage}
             onChange={(e) => setDriverMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                sendDriverMessage();
-              }
-            }}
           />
-          <button type="button" onClick={sendDriverMessage}>
-            Send
-          </button>
-        </div>
+          <button type="submit">Send</button>
+        </form>
       </div>
     </div>
   );
 };
 
 export default ChatPage;
-
