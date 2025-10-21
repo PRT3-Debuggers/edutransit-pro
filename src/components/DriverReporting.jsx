@@ -2,17 +2,23 @@ import React, { useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import MessageModal from "./../modals/MessageModal.jsx";
 import { saveDoc } from "./../firebase/firebase.js";
-import "./DriverReporting.css";
+import "../assets/styles/DriverReporting.css";
 
 export default function DriverReporting() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // driver may be passed via location.state by caller; fallback to param id
-  const driver = location.state?.driver || { id: id || null, name: location.state?.name || "Unknown Driver" };
+  console.log("🚀 DriverReporting Component Loaded!");
+  console.log("Params id:", id);
+  console.log("Location state:", location.state);
 
-  // Read logged-in user from sessionStorage (project convention)
+  const driver = location.state?.driver || { 
+    id: id || "unknown", 
+    name: location.state?.name || "Unknown Driver" 
+  };
+
+  // Read logged-in user from sessionStorage
   const storedUser = (() => {
     try {
       return JSON.parse(sessionStorage.getItem("userData")) || {};
@@ -60,9 +66,9 @@ export default function DriverReporting() {
 
   return (
     <div className="driver-reporting-container">
-      <h2 className="driver-reporting-title">
-        Report Driver{driver.name ? ` — ${driver.name}` : ""}
-      </h2>
+      <h1 className="driver-reporting-title">
+        🚨 Report Driver
+      </h1>
 
       <MessageModal
         isOpen={modalOpen}
@@ -85,14 +91,24 @@ export default function DriverReporting() {
         </label>
 
         <label className="form-label">
-          Reason
+          Driver Name
+          <input 
+            type="text" 
+            value={driver.name || ""} 
+            readOnly 
+            className="form-input" 
+          />
+        </label>
+
+        <label className="form-label">
+          Reason for Report *
           <select
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             required
             className="form-select"
           >
-            <option value="">Select reason</option>
+            <option value="">Select a reason</option>
             <option value="unsafe-driving">Unsafe driving</option>
             <option value="late-arrival">Late arrival / no-show</option>
             <option value="behavior">Inappropriate behavior</option>
@@ -130,6 +146,15 @@ export default function DriverReporting() {
           </button>
         </div>
       </form>
+
+      {/* Debug information - you can remove this in production */}
+      <div className="debug-info">
+        <h3>Debug Information:</h3>
+        <p><strong>Driver ID from URL:</strong> {id}</p>
+        <p><strong>Driver Name:</strong> {driver.name}</p>
+        <p><strong>Has Location State:</strong> {location.state ? "Yes" : "No"}</p>
+        <p><strong>User Logged In:</strong> {user?.firstName ? "Yes" : "No"}</p>
+      </div>
     </div>
   );
 }

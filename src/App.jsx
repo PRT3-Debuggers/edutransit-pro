@@ -14,13 +14,13 @@ import DriverReview from "./components/DriverReview.jsx";
 import AllReview from "./components/AllReview.jsx";
 import FileTicket from "./components/FileTicket.jsx";
 import ViewTickets from "./components/ViewTickets.jsx";
+import DriverReporting from "./components/DriverReporting.jsx";
 
 function App() {
     return (
         <BrowserRouter>
             <Navigation></Navigation>
             <Routes>
-                {/*<Route path="/" element={</>}/>*/}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/tickets" element={<FileTicket />} />
                 <Route path="/tickets/view" element={<ViewTickets />} />
@@ -33,6 +33,8 @@ function App() {
                 <Route path="/finddriver" element={<MapWithPoints/>}/>
                 <Route path="/reviews/:id" element={<DriverReview />} />
                 <Route path="/reviews" element={<AllReview />} />
+                {/* Fixed the route path to match your navigation */}
+                <Route path="/reportdriver/:id" element={<DriverReporting />} />
             </Routes>
         </BrowserRouter>
     );

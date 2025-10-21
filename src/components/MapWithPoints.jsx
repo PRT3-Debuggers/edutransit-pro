@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import "../assets/styles/MapWithPoints.css";
 import {Tooltip} from 'react-leaflet/Tooltip';
+
 const points = [
   { id: 1, name: 'John Doe', lat: -33.9249, lng: 18.4241, status: 'Available', schools: ['Groote Schuur High'], vehicle: 'Renault Clio', languages: ['English','Afrikaans'], criminal_record: true, max_passengers: 2, gender: 'male', race: 'coloured', available_seats: 1, profilePic: 'https://randomuser.me/api/portraits/men/1.jpg' },
   { id: 2, name: 'Lebo Mokoena', lat: -33.9180, lng: 18.4210, status: 'Unavailable', schools: ['Claremont High'], vehicle: 'Toyota Quantum', languages: ['Zulu','English'], criminal_record: false, max_passengers: 12, gender: 'male', race: 'black', available_seats: 0, profilePic: 'https://randomuser.me/api/portraits/men/2.jpg' },
@@ -60,14 +61,13 @@ const points = [
   { id: 49, name: 'Megan Nkosi', lat: -33.9255, lng: 18.4205, status: 'Available', schools: ['Table View High'], vehicle: 'Toyota Hilux', languages: ['Zulu','English'], criminal_record: false, max_passengers: 5, gender: 'female', race: 'black', available_seats: 3, profilePic: 'https://randomuser.me/api/portraits/women/49.jpg' },
   { id: 50, name: 'Nico Botha', lat: -33.9155, lng: 18.4305, status: 'Available', schools: ['Claremont Primary'], vehicle: 'VW Golf', languages: ['English','Afrikaans'], criminal_record: false, max_passengers: 3, gender: 'male', race: 'coloured', available_seats: 2, profilePic: 'https://randomuser.me/api/portraits/men/50.jpg' },
 ];
-
 export default function MapWithPoints() {
     const [selectedPoint, setSelectedPoint] = useState(null);
     const [map, setMap] = useState(null);
     const [filters, setFilters] = useState({});
     const [appliedFilters, setAppliedFilters] = useState({});
     const navigate = useNavigate();
-  const [hoveredDriver, setHoveredDriver] = useState(null);
+    const [hoveredDriver, setHoveredDriver] = useState(null);
 
     useEffect(() => {
         if (map && selectedPoint) {
@@ -87,6 +87,16 @@ export default function MapWithPoints() {
         }
     };
 
+  const handleReportDriver = () => {
+    if (selectedPoint) {
+        console.log("Navigating to report driver:", selectedPoint);
+        navigate(`/reportdriver/${selectedPoint.id}`, { 
+            state: { 
+                driver: selectedPoint 
+            } 
+        });
+    }
+};
     const filteredPoints = points.filter(point => {
         return Object.entries(appliedFilters).every(([key, value]) => {
             if (!value) return true;
@@ -97,6 +107,27 @@ export default function MapWithPoints() {
             return String(pointValue).toLowerCase().includes(value.toLowerCase());
         });
     });
+
+    // Improved button styles
+    const buttonStyle = {
+        marginTop: "0.5rem",
+        padding: "8px 12px",
+        borderRadius: "4px",
+        border: "none",
+        backgroundColor: "#000000",
+        color: "#fff",
+        cursor: "pointer",
+        width: "60%",
+        fontSize: "14px",
+        fontWeight: "500",
+        transition: "all 0.2s ease"
+    };
+
+    const buttonHoverStyle = {
+        ...buttonStyle,
+        backgroundColor: "#333333",
+        transform: "translateY(-1px)"
+    };
 
     return (
         <div style={{ padding: "1rem", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
@@ -117,29 +148,27 @@ export default function MapWithPoints() {
                     >
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         {filteredPoints.map((point) => (
-                    <Marker
-                    key={point.id}
-                    position={[point.lat, point.lng]}
-                    eventHandlers={{
-                        click: () => setSelectedPoint(point),
-                        mouseover: () => setHoveredDriver(point),
-                        mouseout: () => setHoveredDriver(null),
-                    }}
-                    >
-                    <Tooltip
-                        direction="top"
-                        offset={[0, -10]}
-                        opacity={1}
-                        permanent={hoveredDriver?.id === point.id} // only visible while hovered
-                    >
-                        <DriverCard
-                        name={point.name}
-                        profilePic={point.profilePic}
-                        />
-                    </Tooltip>
-                    </Marker>
-
-
+                            <Marker
+                                key={point.id}
+                                position={[point.lat, point.lng]}
+                                eventHandlers={{
+                                    click: () => setSelectedPoint(point),
+                                    mouseover: () => setHoveredDriver(point),
+                                    mouseout: () => setHoveredDriver(null),
+                                }}
+                            >
+                                <Tooltip
+                                    direction="top"
+                                    offset={[0, -10]}
+                                    opacity={1}
+                                    permanent={hoveredDriver?.id === point.id}
+                                >
+                                    <DriverCard
+                                        name={point.name}
+                                        profilePic={point.profilePic}
+                                    />
+                                </Tooltip>
+                            </Marker>
                         ))}
                     </MapContainer>
 
@@ -195,10 +224,10 @@ export default function MapWithPoints() {
                 <div className="detailView" style={{
                     flex: 1,
                     border: "1px solid #ccc",
-                    padding: "1rem 1.5rem",
+                    padding: "1.5rem",
                     borderRadius: 8,
                     backgroundColor: "#fdfdfd",
-                    minWidth: 280,
+                    minWidth: 300,
                 }}>
                     {selectedPoint ? (
                         <>
@@ -214,7 +243,7 @@ export default function MapWithPoints() {
                                     marginBottom: "1rem",
                                 }}
                             />
-                            <h3>{selectedPoint.name}</h3>
+                            <h3 style={{ marginBottom: "1rem" }}>{selectedPoint.name}</h3>
                             <p><strong>Driver ID:</strong> {selectedPoint.id}</p>
                             <p><strong>Status:</strong> {selectedPoint.status}</p>
                             <p><strong>Vehicle:</strong> {selectedPoint.vehicle}</p>
@@ -227,25 +256,35 @@ export default function MapWithPoints() {
                             <p><strong>Race:</strong> {selectedPoint.race}</p>
                             <p><strong>Latitude:</strong> {selectedPoint.lat}</p>
                             <p><strong>Longitude:</strong> {selectedPoint.lng}</p>
-                            <button onClick={handleReviewDriver} style={{
-                                marginTop: "0.5rem",
-                                padding: "8px 16px",
-                                borderRadius: 6,
-                                border: "none",
-                                backgroundColor: "#000000ff",
-                                color: "#fff",
-                                cursor: "pointer"
-                            }}>Review Driver</button>
-                            <br/>
-                            <button onClick={handleMessageDriver} style={{
-                                marginTop: "0.5rem",
-                                padding: "8px 16px",
-                                borderRadius: 6,
-                                border: "none",
-                                backgroundColor: "#000000ff",
-                                color: "#fff",
-                                cursor: "pointer"
-                            }}>Message Driver</button>
+                            
+                            <div style={{ marginTop: "1.5rem" }}>
+                                <button 
+                                    onClick={handleReviewDriver} 
+                                    style={buttonStyle}
+                                    onMouseOver={(e) => Object.assign(e.target.style, buttonHoverStyle)}
+                                    onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+                                >
+                                    Review Driver
+                                </button>
+                                
+                                <button 
+                                    onClick={handleMessageDriver} 
+                                    style={buttonStyle}
+                                    onMouseOver={(e) => Object.assign(e.target.style, buttonHoverStyle)}
+                                    onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+                                >
+                                    Message Driver
+                                </button>
+                                
+                                <button 
+                                    onClick={handleReportDriver} 
+                                    style={buttonStyle}
+                                    onMouseOver={(e) => Object.assign(e.target.style, buttonHoverStyle)}
+                                    onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+                                >
+                                    Report Driver
+                                </button>
+                            </div>
                         </>
                     ) : <p>Select a driver to view details</p>}
                 </div>
@@ -253,7 +292,6 @@ export default function MapWithPoints() {
         </div>
     );
 }
-
 function FilterBar({ filters, setFilters, onApply }) {
     const handleChange = (field, value) => setFilters(prev => ({ ...prev, [field]: value }));
 
@@ -267,7 +305,7 @@ function FilterBar({ filters, setFilters, onApply }) {
     };
 
     const buttonStyle = {
-        padding: "6px 16px",
+        padding: "5px 14px",
         borderRadius: 6,
         border: "none",
         backgroundColor: "#000000ff",
