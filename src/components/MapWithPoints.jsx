@@ -81,11 +81,13 @@ export default function MapWithPoints() {
         }
     };
 
-    const currentUserId = "Parent123"; 
+    const handleMessageDriver = () => {
     if (selectedPoint) {
+        const currentUserId = "Parent123";
         navigate(`/messagedriver/${selectedPoint.id}/${currentUserId}`, { state: { driver: selectedPoint } });
     }
 };
+
     const filteredPoints = points.filter(point => {
         return Object.entries(appliedFilters).every(([key, value]) => {
             if (!value) return true;
@@ -456,3 +458,8 @@ function DriverCard({ name, profilePic, onClick, selected }) {
   );
 }
 
+
+
+
+
+}
