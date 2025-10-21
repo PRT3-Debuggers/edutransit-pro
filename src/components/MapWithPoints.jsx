@@ -82,10 +82,11 @@ export default function MapWithPoints() {
     };
 
     const handleMessageDriver = () => {
-        if (selectedPoint) {
-            navigate(`/messagedriver/${selectedPoint.id}`, { state: { driver: selectedPoint } });
-        }
-    };
+    if (selectedPoint) {
+        const currentUserId = "Parent123";
+        navigate(`/messagedriver/${selectedPoint.id}/${currentUserId}`, { state: { driver: selectedPoint } });
+    }
+};
 
     const filteredPoints = points.filter(point => {
         return Object.entries(appliedFilters).every(([key, value]) => {
@@ -252,7 +253,6 @@ export default function MapWithPoints() {
             </div>
         </div>
     );
-}
 
  function FilterBar({ filters, setFilters, onApply }) {
     const [locationQuery, setLocationQuery] = useState("");
@@ -458,3 +458,8 @@ function DriverCard({ name, profilePic, onClick, selected }) {
   );
 }
 
+
+
+
+
+}

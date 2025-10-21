@@ -15,6 +15,9 @@ import DriverReview from "./components/DriverReview.jsx";
 import AllReview from "./components/AllReview.jsx";
 import FileTicket from "./components/FileTicket.jsx";
 import ViewTickets from "./components/ViewTickets.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
+
+
 
 function App() {
     return (
@@ -35,9 +38,11 @@ function App() {
                 <Route path="/finddriver" element={<MapWithPoints/>}/>
                 <Route path="/reviews/:id" element={<DriverReview />} />
                 <Route path="/reviews" element={<AllReview />} />
+               <Route path="/messagedriver/:driverId/:parentId" element={<ChatPage />} />
             </Routes>
         </BrowserRouter>
     );
 }
 
 export default App;
+// --- IGNORE ---
