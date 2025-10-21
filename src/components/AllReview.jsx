@@ -1,13 +1,42 @@
 import React, { useEffect, useState } from "react";
 import "../assets/styles/DriverReview.css";
+import { db } from "../firebase/firebase";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+
+
 
 export default function AllReviews() {
     const [reviews, setReviews] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedReviews = JSON.parse(localStorage.getItem("reviews")) || [];
-        setReviews(storedReviews);
+        const fetchReviews = async () => {
+            try {
+                const q = query(collection(db, "driver-reviews"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                const fetchedReviews = querySnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setReviews(fetchedReviews);
+            } catch (error) {
+                console.error("Error fetching reviews:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchReviews();
     }, []);
+
+    if (loading) {
+        return (
+            <div className="review-container">
+                <div className="review-card">
+                    <p>Loading reviews...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="review-container">
@@ -22,7 +51,12 @@ export default function AllReviews() {
                                 <br />
                                 <em>{r.comment}</em>
                                 <br />
-                                <small>🕒 {r.date}</small>
+                                <small>
+                                    🕒{" "}
+                                    {r.timestamp?.toDate
+                                        ? r.timestamp.toDate().toLocaleString()
+                                        : ""}
+                                </small>
                             </li>
                         ))}
                     </ul>

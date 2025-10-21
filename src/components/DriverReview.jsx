@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import "../assets/styles/DriverReview.css";
+import { saveDriverReview, getDriverReviews } from "../firebase/firebase.js";
+
 
 const drivers = [
     { id: 1, name: "John Doe", vehicle: "Renault Clio", languages: ["English", "Afrikaans"], status: "Available", profilePic: "https://randomuser.me/api/portraits/men/1.jpg" },
@@ -32,38 +34,39 @@ export default function DriverReview() {
         }
     }, [id, driver]);
 
-    // Load reviews from localStorage
+    // Load reviews from Firestore
     useEffect(() => {
-        const storedReviews = JSON.parse(localStorage.getItem("reviews")) || [];
-        const driverReviews = storedReviews.filter((r) => r.driverId === Number(id));
-        setReviews(driverReviews);
+        const fetchReviews = async () => {
+            const driverReviews = await getDriverReviews(Number(id));
+            setReviews(driverReviews);
+        };
+        fetchReviews();
     }, [id]);
 
-    const handleReviewSubmit = (e) => {
+    // Submit new review
+    const handleReviewSubmit = async (e) => {
         e.preventDefault();
         const rating = e.target.rating.value;
         const comment = e.target.comment.value;
 
         const newReview = {
-            id: Date.now(),
             driverId: Number(id),
             driverName: driver.name,
             rating: Number(rating),
             comment,
-            date: new Date().toLocaleString(),
         };
 
-        // Save to localStorage
-        const storedReviews = JSON.parse(localStorage.getItem("reviews")) || [];
-        const updatedReviews = [...storedReviews, newReview];
-        localStorage.setItem("reviews", JSON.stringify(updatedReviews));
-
-        // Update UI
-        setReviews([...reviews, newReview]);
-        setSuccessMsg("✅ Your review has been submitted!");
-
-        setTimeout(() => setSuccessMsg(""), 3000);
-        e.target.reset();
+        try {
+            await saveDriverReview(newReview);
+            setSuccessMsg("✅ Your review has been submitted!");
+            setReviews((prev) => [newReview, ...prev]);
+            setTimeout(() => setSuccessMsg(""), 3000);
+            e.target.reset();
+        } catch (error) {
+            console.error("Error submitting review:", error);
+            setSuccessMsg("❌ Failed to submit review. Try again.");
+            setTimeout(() => setSuccessMsg(""), 3000);
+        }
     };
 
     if (!driver) {
@@ -96,7 +99,12 @@ export default function DriverReview() {
                                 <li key={rev.id}>
                                     <strong>⭐ {rev.rating}/5</strong> — {rev.comment}
                                     <br />
-                                    <small>🕒 {rev.date}</small>
+                                    <small>
+                                        🕒{" "}
+                                        {rev.timestamp?.toDate
+                                            ? rev.timestamp.toDate().toLocaleString()
+                                            : ""}
+                                    </small>
                                 </li>
                             ))}
                         </ul>
