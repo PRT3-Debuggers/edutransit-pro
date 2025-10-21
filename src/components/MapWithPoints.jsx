@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import "../assets/styles/MapWithPoints.css";
 import {Tooltip} from 'react-leaflet/Tooltip';
+import {getDocumentsByField} from '../firebase/firebase.js';
+
 const points = [
   { id: 1, name: 'John Doe', lat: -33.9249, lng: 18.4241, status: 'Available', schools: ['Groote Schuur High'], vehicle: 'Renault Clio', languages: ['English','Afrikaans'], criminal_record: true, max_passengers: 2, gender: 'male', race: 'coloured', available_seats: 1, profilePic: 'https://randomuser.me/api/portraits/men/1.jpg' },
   { id: 2, name: 'Lebo Mokoena', lat: -33.9180, lng: 18.4210, status: 'Unavailable', schools: ['Claremont High'], vehicle: 'Toyota Quantum', languages: ['Zulu','English'], criminal_record: false, max_passengers: 12, gender: 'male', race: 'black', available_seats: 0, profilePic: 'https://randomuser.me/api/portraits/men/2.jpg' },
@@ -61,19 +63,89 @@ const points = [
   { id: 50, name: 'Nico Botha', lat: -33.9155, lng: 18.4305, status: 'Available', schools: ['Claremont Primary'], vehicle: 'VW Golf', languages: ['English','Afrikaans'], criminal_record: false, max_passengers: 3, gender: 'male', race: 'coloured', available_seats: 2, profilePic: 'https://randomuser.me/api/portraits/men/50.jpg' },
 ];
 
+const ReviewsList = ({reviews}) => {
+  // Helper to render stars
+  const renderStars = (rating) => {
+    return (
+      <div style={{ color: "#f5c518" }}>
+        {Array.from({ length: 5 }, (_, i) => (
+          <span key={i}>{i < rating ? "★" : "☆"}</span>
+        ))}
+      </div>
+    );
+  };
+
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleString();
+  };
+
+  return (
+    <div style={styles.container}>
+      {reviews.map((review) => (
+        <div key={review.id} style={styles.card}>
+          <h3 style={styles.name}>{review.driverName}</h3>
+          {renderStars(review.rating)}
+          <p style={styles.comment}>{review.comment}</p>
+          <small style={styles.timestamp}>
+            {formatTimestamp(review.timestamp)}
+          </small>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+    padding: "20px",
+  },
+  card: {
+    border: "1px solid #ddd",
+    borderRadius: "10px",
+    padding: "15px",
+    backgroundColor: "#fff",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  name: {
+    marginBottom: "5px",
+  },
+  comment: {
+    margin: "8px 0",
+    fontStyle: "italic",
+  },
+  timestamp: {
+    color: "#777",
+  },
+};
+
 export default function MapWithPoints() {
     const [selectedPoint, setSelectedPoint] = useState(null);
     const [map, setMap] = useState(null);
     const [filters, setFilters] = useState({});
     const [appliedFilters, setAppliedFilters] = useState({});
     const navigate = useNavigate();
-  const [hoveredDriver, setHoveredDriver] = useState(null);
+    const [hoveredDriver, setHoveredDriver] = useState(null);
+    const [driverId,setDriverId] = useState(null);
+    const [reviews, setReviews] = useState([]);
 
     useEffect(() => {
         if (map && selectedPoint) {
             map.flyTo([selectedPoint.lat, selectedPoint.lng], 13, { duration: 1.5 });
         }
     }, [selectedPoint, map]);
+
+    useEffect(() => {
+        const fetchedReviews = async ()=>{
+            const response = await getDocumentsByField('driver-reviews', 'driverId', selectedPoint?.id || 0);
+        console.log("Fetched reviews for driver:", response);
+        setReviews(response);
+        }
+        fetchedReviews();
+    }, [selectedPoint]);
 
     const handleReviewDriver = () => {
         if (selectedPoint) {
@@ -201,54 +273,66 @@ export default function MapWithPoints() {
                     backgroundColor: "#fdfdfd",
                     minWidth: 280,
                 }}>
-                    {selectedPoint ? (
-                        <>
-                            <img
-                                src={selectedPoint.profilePic}
-                                alt={selectedPoint.name}
-                                style={{
-                                    width: 80,
-                                    height: 80,
-                                    borderRadius: "50%",
-                                    objectFit: "cover",
-                                    border: "3px solid #000",
-                                    marginBottom: "1rem",
-                                }}
-                            />
-                            <h3>{selectedPoint.name}</h3>
-                            <p><strong>Driver ID:</strong> {selectedPoint.id}</p>
-                            <p><strong>Status:</strong> {selectedPoint.status}</p>
-                            <p><strong>Vehicle:</strong> {selectedPoint.vehicle}</p>
-                            <p><strong>Schools:</strong> {selectedPoint.schools.join(", ")}</p>
-                            <p><strong>Languages:</strong> {selectedPoint.languages.join(", ")}</p>
-                            <p><strong>Criminal Record:</strong> {selectedPoint.criminal_record ? "Yes" : "No"}</p>
-                            <p><strong>Max Passengers:</strong> {selectedPoint.max_passengers}</p>
-                            <p><strong>Available Seats:</strong> {selectedPoint.available_seats}</p>
-                            <p><strong>Gender:</strong> {selectedPoint.gender}</p>
-                            <p><strong>Race:</strong> {selectedPoint.race}</p>
-                            <p><strong>Latitude:</strong> {selectedPoint.lat}</p>
-                            <p><strong>Longitude:</strong> {selectedPoint.lng}</p>
-                            <button onClick={handleReviewDriver} style={{
-                                marginTop: "0.5rem",
-                                padding: "8px 16px",
-                                borderRadius: 6,
-                                border: "none",
-                                backgroundColor: "#000000ff",
-                                color: "#fff",
-                                cursor: "pointer"
-                            }}>Review Driver</button>
-                            <br/>
-                            <button onClick={handleMessageDriver} style={{
-                                marginTop: "0.5rem",
-                                padding: "8px 16px",
-                                borderRadius: 6,
-                                border: "none",
-                                backgroundColor: "#000000ff",
-                                color: "#fff",
-                                cursor: "pointer"
-                            }}>Message Driver</button>
-                        </>
-                    ) : <p>Select a driver to view details</p>}
+                    <div style={{
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "1.5rem",
+  flexWrap: "wrap"
+}}>
+  {/* LEFT: Driver Info */}
+  <div style={{ flex: 1, minWidth: 250 }}>
+    <img
+      src={selectedPoint.profilePic}
+      alt={selectedPoint.name}
+      style={{
+        width: 80,
+        height: 80,
+        borderRadius: "50%",
+        objectFit: "cover",
+        border: "3px solid #000",
+        marginBottom: "1rem",
+      }}
+    />
+    <h3>{selectedPoint.name}</h3>
+    <p><strong>Status:</strong> {selectedPoint.status}</p>
+    <p><strong>Vehicle:</strong> {selectedPoint.vehicle}</p>
+    <p><strong>Schools:</strong> {selectedPoint.schools.join(", ")}</p>
+    <p><strong>Languages:</strong> {selectedPoint.languages.join(", ")}</p>
+    <p><strong>Criminal Record:</strong> {selectedPoint.criminal_record ? "Yes" : "No"}</p>
+    <p><strong>Max Passengers:</strong> {selectedPoint.max_passengers}</p>
+    <p><strong>Available Seats:</strong> {selectedPoint.available_seats}</p>
+    <p><strong>Gender:</strong> {selectedPoint.gender}</p>
+    <p><strong>Race:</strong> {selectedPoint.race}</p>
+
+    <button onClick={handleReviewDriver} style={{
+      marginTop: "0.5rem",
+      padding: "8px 16px",
+      borderRadius: 6,
+      border: "none",
+      backgroundColor: "#000000ff",
+      color: "#fff",
+      cursor: "pointer"
+    }}>Review Driver</button>
+    <br/>
+    <button onClick={handleMessageDriver} style={{
+      marginTop: "0.5rem",
+      padding: "8px 16px",
+      borderRadius: 6,
+      border: "none",
+      backgroundColor: "#000000ff",
+      color: "#fff",
+      cursor: "pointer"
+    }}>Message Driver</button>
+  </div>
+
+  {/* RIGHT: Reviews */}
+  <div style={{ flex: 1, minWidth: 300 }}>
+    <h2>Reviews</h2>
+    {reviews.length > 0
+      ? <ReviewsList reviews={reviews} />
+      : <p style={{ marginTop: "1rem" }}>No reviews yet.</p>}
+  </div>
+</div>
                 </div>
             </div>
         </div>
@@ -463,3 +547,5 @@ function DriverCard({ name, profilePic, onClick, selected }) {
 
 
 }
+
+
