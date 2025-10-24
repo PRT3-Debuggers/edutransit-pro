@@ -194,12 +194,23 @@ export default function MapWithPoints() {
     };
 
     const handleMessageDriver = () => {
-    if (selectedPoint) {
-        const currentUserId = "Parent123";
-        navigate(`/messagedriver/${selectedPoint.id}/${currentUserId}`, { state: { driver: selectedPoint } });
-    }
+  if (!selectedPoint) return;
+  const parentId= "Parent123"; 
+  navigate(`/messagedriver/${selectedPoint.id}/${parentId}`, {
+  state: { role: "parent", userId: parentId }
+});
 };
 
+  const handleReportDriver = () => {
+    if (selectedPoint) {
+        console.log("Navigating to report driver:", selectedPoint);
+        navigate(`/reportdriver/${selectedPoint.id}`, { 
+            state: { 
+                driver: selectedPoint 
+            } 
+        });
+    }
+};
     const filteredPoints = points.filter(point => {
         return Object.entries(appliedFilters).every(([key, value]) => {
             if (!value) return true;
@@ -210,6 +221,27 @@ export default function MapWithPoints() {
             return String(pointValue).toLowerCase().includes(value.toLowerCase());
         });
     });
+
+    // Improved button styles
+    const buttonStyle = {
+        marginTop: "0.5rem",
+        padding: "8px 12px",
+        borderRadius: "4px",
+        border: "none",
+        backgroundColor: "#000000",
+        color: "#fff",
+        cursor: "pointer",
+        width: "60%",
+        fontSize: "14px",
+        fontWeight: "500",
+        transition: "all 0.2s ease"
+    };
+
+    const buttonHoverStyle = {
+        ...buttonStyle,
+        backgroundColor: "#333333",
+        transform: "translateY(-1px)"
+    };
 
     return (
         <div style={{ padding: "1rem", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
@@ -230,6 +262,27 @@ export default function MapWithPoints() {
                     >
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         {filteredPoints.map((point) => (
+                            <Marker
+                                key={point.id}
+                                position={[point.lat, point.lng]}
+                                eventHandlers={{
+                                    click: () => setSelectedPoint(point),
+                                    mouseover: () => setHoveredDriver(point),
+                                    mouseout: () => setHoveredDriver(null),
+                                }}
+                            >
+                                <Tooltip
+                                    direction="top"
+                                    offset={[0, -10]}
+                                    opacity={1}
+                                    permanent={hoveredDriver?.id === point.id}
+                                >
+                                    <DriverCard
+                                        name={point.name}
+                                        profilePic={point.profilePic}
+                                    />
+                                </Tooltip>
+                            </Marker>
                     <Marker
                     key={point.id}
                     position={[point.lat, point.lng]}
@@ -243,7 +296,7 @@ export default function MapWithPoints() {
                         direction="top"
                         offset={[0, -10]}
                         opacity={1}
-                        permanent={hoveredDriver?.id === point.id} // only visible while hovered
+                        permanent={hoveredDriver?.id === point.id} 
                     >
                         <DriverCard
                         name={point.name}
@@ -308,11 +361,69 @@ export default function MapWithPoints() {
                 <div className="detailView" style={{
                     flex: 1,
                     border: "1px solid #ccc",
-                    padding: "1rem 1.5rem",
+                    padding: "1.5rem",
                     borderRadius: 8,
                     backgroundColor: "#fdfdfd",
-                    minWidth: 280,
+                    minWidth: 300,
                 }}>
+                    {selectedPoint ? (
+                        <>
+                            <img
+                                src={selectedPoint.profilePic}
+                                alt={selectedPoint.name}
+                                style={{
+                                    width: 80,
+                                    height: 80,
+                                    borderRadius: "50%",
+                                    objectFit: "cover",
+                                    border: "3px solid #000",
+                                    marginBottom: "1rem",
+                                }}
+                            />
+                            <h3 style={{ marginBottom: "1rem" }}>{selectedPoint.name}</h3>
+                            <p><strong>Driver ID:</strong> {selectedPoint.id}</p>
+                            <p><strong>Status:</strong> {selectedPoint.status}</p>
+                            <p><strong>Vehicle:</strong> {selectedPoint.vehicle}</p>
+                            <p><strong>Schools:</strong> {selectedPoint.schools.join(", ")}</p>
+                            <p><strong>Languages:</strong> {selectedPoint.languages.join(", ")}</p>
+                            <p><strong>Criminal Record:</strong> {selectedPoint.criminal_record ? "Yes" : "No"}</p>
+                            <p><strong>Max Passengers:</strong> {selectedPoint.max_passengers}</p>
+                            <p><strong>Available Seats:</strong> {selectedPoint.available_seats}</p>
+                            <p><strong>Gender:</strong> {selectedPoint.gender}</p>
+                            <p><strong>Race:</strong> {selectedPoint.race}</p>
+                            <p><strong>Latitude:</strong> {selectedPoint.lat}</p>
+                            <p><strong>Longitude:</strong> {selectedPoint.lng}</p>
+                            
+                            <div style={{ marginTop: "1.5rem" }}>
+                                <button 
+                                    onClick={handleReviewDriver} 
+                                    style={buttonStyle}
+                                    onMouseOver={(e) => Object.assign(e.target.style, buttonHoverStyle)}
+                                    onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+                                >
+                                    Review Driver
+                                </button>
+                                
+                                <button 
+                                    onClick={handleMessageDriver} 
+                                    style={buttonStyle}
+                                    onMouseOver={(e) => Object.assign(e.target.style, buttonHoverStyle)}
+                                    onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+                                >
+                                    Message Driver
+                                </button>
+                                
+                                <button 
+                                    onClick={handleReportDriver} 
+                                    style={buttonStyle}
+                                    onMouseOver={(e) => Object.assign(e.target.style, buttonHoverStyle)}
+                                    onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+                                >
+                                    Report Driver
+                                </button>
+                            </div>
+                        </>
+                    ) : <p>Select a driver to view details</p>}
                     <div style={{
   display: "flex",
   alignItems: "flex-start",
@@ -377,11 +488,11 @@ export default function MapWithPoints() {
             </div>
         </div>
     );
+}
 
  function FilterBar({ filters, setFilters, onApply }) {
     const [locationQuery, setLocationQuery] = useState("");
     const [suggestions, setSuggestions] = useState([]);
-
     const handleChange = (field, value) => setFilters(prev => ({ ...prev, [field]: value }));
 
     const inputStyle = {
@@ -394,7 +505,7 @@ export default function MapWithPoints() {
     };
 
     const buttonStyle = {
-        padding: "6px 16px",
+        padding: "5px 14px",
         borderRadius: 6,
         border: "none",
         backgroundColor: "#000",
