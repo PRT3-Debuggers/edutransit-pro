@@ -10,11 +10,15 @@ import Login from "./components/Login.jsx";
 import Navigation from "./components/Navigation.jsx";
 import MapWithPoints from "./components/MapWithPoints.jsx";
 import Profile from "./components/Profile.jsx";
+import EditProfile from "./components/EditProfile.jsx";
 import DriverReview from "./components/DriverReview.jsx";
 import AllReview from "./components/AllReview.jsx";
 import FileTicket from "./components/FileTicket.jsx";
 import ViewTickets from "./components/ViewTickets.jsx";
 import DriverReporting from "./components/DriverReporting.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
+
+
 
 function App() {
     return (
@@ -25,6 +29,7 @@ function App() {
                 <Route path="/tickets" element={<FileTicket />} />
                 <Route path="/tickets/view" element={<ViewTickets />} />
                 <Route path="/profile" element={<Profile/>}/>
+                <Route path="/edit-profile" element={<EditProfile/>}/>
                 <Route path="/about" element={<About/>}/>
                 <Route path="/drivers" element={<Drivers/>}/>
                 <Route path="/privacy" element={<PrivacyPolicy/>}/>
@@ -35,6 +40,8 @@ function App() {
                 <Route path="/reviews" element={<AllReview />} />
                 {/* Fixed the route path to match your navigation */}
                 <Route path="/reportdriver/:id" element={<DriverReporting />} />
+               <Route path="/messagedriver/:driverId/:parentId" element={<ChatPage />} />
+
             </Routes>
         </BrowserRouter>
     );

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import "../assets/styles/DriverReview.css";
+import { saveDriverReview, getDriverReviews } from "../firebase/firebase.js";
+import { getAuth } from "firebase/auth";
 
 const drivers = [
     { id: 1, name: "John Doe", vehicle: "Renault Clio", languages: ["English", "Afrikaans"], status: "Available", profilePic: "https://randomuser.me/api/portraits/men/1.jpg" },
@@ -19,10 +21,12 @@ export default function DriverReview() {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
+    const auth = getAuth();
 
     const [driver, setDriver] = useState(location.state?.driver || null);
     const [reviews, setReviews] = useState([]);
     const [successMsg, setSuccessMsg] = useState("");
+    const [showAlert, setShowAlert] = useState(false);
 
     // Load driver info
     useEffect(() => {
@@ -32,38 +36,59 @@ export default function DriverReview() {
         }
     }, [id, driver]);
 
-    // Load reviews from localStorage
+    // Load reviews from Firestore
     useEffect(() => {
-        const storedReviews = JSON.parse(localStorage.getItem("reviews")) || [];
-        const driverReviews = storedReviews.filter((r) => r.driverId === Number(id));
-        setReviews(driverReviews);
+        const fetchReviews = async () => {
+            const driverReviews = await getDriverReviews(Number(id));
+            setReviews(driverReviews);
+        };
+        fetchReviews();
     }, [id]);
 
-    const handleReviewSubmit = (e) => {
+    // Submit new review
+    const handleReviewSubmit = async (e) => {
         e.preventDefault();
         const rating = e.target.rating.value;
         const comment = e.target.comment.value;
 
+        // Get current user
+        const user = auth.currentUser;
+        if (!user) {
+            setSuccessMsg("❌ You must be logged in to submit a review.");
+            setTimeout(() => setSuccessMsg(""), 3000);
+            return;
+        }
+
         const newReview = {
-            id: Date.now(),
             driverId: Number(id),
             driverName: driver.name,
             rating: Number(rating),
             comment,
-            date: new Date().toLocaleString(),
+            userId: user.uid, // Add user ID to the review
+            userEmail: user.email, // Optional: also save user email for display
+            timestamp: new Date() // Add timestamp on client side
         };
 
-        // Save to localStorage
-        const storedReviews = JSON.parse(localStorage.getItem("reviews")) || [];
-        const updatedReviews = [...storedReviews, newReview];
-        localStorage.setItem("reviews", JSON.stringify(updatedReviews));
+        try {
+            await saveDriverReview(newReview);
 
-        // Update UI
-        setReviews([...reviews, newReview]);
-        setSuccessMsg("✅ Your review has been submitted!");
+            // Show success alert
+            setShowAlert(true);
+            setTimeout(() => setShowAlert(false), 1000); // Hide after 1 second
 
-        setTimeout(() => setSuccessMsg(""), 3000);
-        e.target.reset();
+            // Also show success message for longer
+            setSuccessMsg("✅ Your review has been submitted successfully!");
+            setTimeout(() => setSuccessMsg(""), 3000);
+
+            // Refresh reviews
+            const driverReviews = await getDriverReviews(Number(id));
+            setReviews(driverReviews);
+
+            e.target.reset();
+        } catch (error) {
+            console.error("Error submitting review:", error);
+            setTimeout(() => setSuccessMsg(""), 3000);
+        }
     };
 
     if (!driver) {
@@ -79,6 +104,13 @@ export default function DriverReview() {
 
     return (
         <div className="review-container">
+            {/* Success Alert */}
+            {showAlert && (
+                <div className="alert-success">
+                    ✅ Review saved successfully!
+                </div>
+            )}
+
             <div className="review-card">
                 <img src={driver.profilePic} alt={driver.name} className="driver-pic" />
                 <h2>{driver.name}</h2>
@@ -96,7 +128,13 @@ export default function DriverReview() {
                                 <li key={rev.id}>
                                     <strong>⭐ {rev.rating}/5</strong> — {rev.comment}
                                     <br />
-                                    <small>🕒 {rev.date}</small>
+                                    <small>
+                                        🕒{" "}
+                                        {rev.timestamp?.toDate
+                                            ? rev.timestamp.toDate().toLocaleString()
+                                            : new Date(rev.timestamp).toLocaleString()}
+                                        {rev.userEmail && ` • by ${rev.userEmail}`}
+                                    </small>
                                 </li>
                             ))}
                         </ul>
