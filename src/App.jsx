@@ -17,6 +17,7 @@ import AllReview from "./components/AllReview.jsx";
 import FileTicket from "./components/FileTicket.jsx";
 import ViewTickets from "./components/ViewTickets.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
+import DriverDashboard from "./components/DriverDashboard.jsx";
 
 
 
@@ -40,6 +41,8 @@ function App() {
                 <Route path="/reviews/:id" element={<DriverReview />} />
                 <Route path="/reviews" element={<AllReview />} />
                <Route path="/messagedriver/:driverId/:parentId" element={<ChatPage />} />
+               <Route path="/driver-profile" element={<DriverProfile />} />
+               <Route path="/driver-dashboard" element={<DriverDashboard />} />
             </Routes>
         </BrowserRouter>
     );
