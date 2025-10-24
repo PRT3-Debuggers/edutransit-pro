@@ -38,9 +38,28 @@ export default function Login() {
             sessionStorage.setItem("userData", JSON.stringify(realUserData));
             console.log("Data stored in session storage");
             
-            console.log("Step 4: Navigating to profile...");
+            // console.log("Step 4: Navigating to profile...");
+            // setModalOpen(true);
+            // navigate('/profile');
+
+            const userRole = realUserData[0].role;
+            console.log("User role identified as:", userRole);
+
+            if (userRole === "Driver") {
+                console.log("Navigating to Driver Dashboard...");
+                navigate("/driver-dashboard");
+            } else if (userRole === "Parent") {
+                    console.log("Navigating to parent dashboard...");
+                    navigate("/parent-dashboard");
+            } else if (userRole === "Admin") {
+                    console.log("Navigating to admin panel...");
+                    navigate("/admin-dashboard");
+            } else {
+                    console.warn("Unknown user role, navigating to generic profile...");
+                    navigate("/profile");
+            }
+
             setModalOpen(true);
-            navigate('/profile');
         } catch (error) {
             console.error("Login failed:", error);
             console.error("Error details:", error.message);

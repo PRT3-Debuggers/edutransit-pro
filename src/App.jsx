@@ -7,6 +7,7 @@ import Drivers from './pages/Drivers';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import SignUp from "./components/SignUp.jsx";
 import Login from "./components/Login.jsx";
+import DriverProfile from './components/DriverProfile.jsx';
 import Navigation from "./components/Navigation.jsx";
 import MapWithPoints from "./components/MapWithPoints.jsx";
 import Profile from "./components/Profile.jsx";
@@ -17,6 +18,7 @@ import FileTicket from "./components/FileTicket.jsx";
 import ViewTickets from "./components/ViewTickets.jsx";
 import DriverReporting from "./components/DriverReporting.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
+import DriverDashboard from "./components/DriverDashboard.jsx";
 
 
 
@@ -41,7 +43,8 @@ function App() {
                 {/* Fixed the route path to match your navigation */}
                 <Route path="/reportdriver/:id" element={<DriverReporting />} />
                <Route path="/messagedriver/:driverId/:parentId" element={<ChatPage />} />
-
+               <Route path="/driver-profile" element={<DriverProfile />} />
+               <Route path="/driver-dashboard" element={<DriverDashboard />} />
             </Routes>
         </BrowserRouter>
     );

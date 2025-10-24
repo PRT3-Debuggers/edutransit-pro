@@ -23,15 +23,27 @@ export default function SignUp() {
         const userData = { emailAddress, firstName, lastName, role };
 
         try {
-            await signUpUser(emailAddress, password);
-            await saveDoc(userData, "user-data");
+            // await signUpUser(emailAddress, password);
+            // await saveDoc(userData, "user-data");
 
-            setEmailAddress("");
-            setFirstName("");
-            setLastName("");
-            setPassword("");
-            setConfirmPassword("");
-            setRole("Parent");
+             // setEmailAddress("");
+            // setFirstName("");
+            // setLastName("");
+            // setPassword("");
+            // setConfirmPassword("");
+            // setRole("Parent");
+            const user = await signUpUser(emailAddress, password);
+            const userDataWithID = {
+                uid: user.uid,
+                emailAddress,
+                firstName,
+                lastName,
+                role
+            };
+
+            await saveDoc(userDataWithID, "user-data")
+
+            sessionStorage.setItem("user-data", JSON.stringify(userDataWithID));
 
             setModalOpen(true);
         } catch (error) {
@@ -104,9 +116,18 @@ export default function SignUp() {
             <MessageModal
                 isOpen={modalOpen}
                 onClose={() => {
-                    setModalOpen(false);
-                    navigate('/login');
+                    setModalOpen(false)
+                    if (role == "Driver"){
+                        navigate('/driver-profile');
+                    } else {
+                        navigate('/login')
+                    }
                 }}
+                // isOpen={modalOpen}
+                // onClose={() => {
+                //     setModalOpen(false);
+                //     navigate('/login');
+                // }}
                 message="Signup successful"
             />
 
